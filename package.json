@@ -14,6 +14,7 @@
     "assert": "1.4.1",
     "asyncstorage-down": "^3.0.0",
     "bitcoinjs-lib": "^3.3.1",
+    "ethereum-address": "^0.0.4",
     "bs58check": "^2.1.1",
     "buffer": "5.0.8",
     "events": "^1.1.1",
