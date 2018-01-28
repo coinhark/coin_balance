@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { RefreshControl, Clipboard, Text, View, ScrollView, StyleSheet, Alert, AsyncStorage, ActivityIndicator, Keyboard } from 'react-native';
 import { FormLabel, FormInput, Button, Card } from 'react-native-elements'
 import GlobalConstants from '../globals';
+import CoinManager from '../coinmanager';
 import renderIf from '../utils/renderIf.js';
 import Swipeout from 'react-native-swipeout';
 import Numbers from '../utils/numbers';
@@ -31,7 +32,7 @@ export default class ManageAddress extends Component {
             }
         }
         this.wallets = [];
-        this.globals = new GlobalConstants();
+        this.coinManager = new CoinManager();
     }
 
     componentDidMount() {
@@ -52,17 +53,17 @@ export default class ManageAddress extends Component {
             this.setState({"db": JSON.parse(value)});
             console.log("db state is now: " + value);
             let tmpDb = this.state.db;
-            fetch(this.globals.getMarketApi().url)
+            fetch(this.coinManager.getMarketApi().url)
                 .then(response => response.json())
                 .then(responseJson => {
                     tmpDb.exchange.price = responseJson[0].price_usd;
             })
             Promise.all(this.state.db.balanceInfo.addresses.map(o =>
-                fetch(this.globals.getBlockchainApi().url + o.inputAddress).then(resp => resp.json())
+                fetch(this.coinManager.getBlockchainApi().url + o.inputAddress).then(resp => resp.json())
             )).then(json => {
                     if(!Array.isArray(json) || json[0].balance == null) {
-                        console.log(`Unexpected result from ${this.globals.getBlockchainApi().name} API.`);
-                        this.setState({ apiError: `Unexpected result from ${this.globals.getBlockchainApi().name} API.`});
+                        console.log(`Unexpected result from ${this.coinManager.getBlockchainApi().name} API.`);
+                        this.setState({ apiError: `Unexpected result from ${this.coinManager.getBlockchainApi().name} API.`});
                     }
                 json.forEach((element, index) => {
                     const path = tmpDb.balanceInfo.addresses[index];
@@ -73,8 +74,8 @@ export default class ManageAddress extends Component {
                 AsyncStorage.setItem("db", JSON.stringify(tmpDb));
                 console.log("db state is now: " + JSON.stringify(this.state.db));
             }).catch(error => {
-                this.setState({ apiError: `Error connecting to the ${this.globals.getBlockchainApi().name} API.`});
-                console.log(`Error connecting to the ${this.globals.getBlockchainApi().name} API.`);
+                this.setState({ apiError: `Error connecting to the ${this.coinManager.getBlockchainApi().name} API.`});
+                console.log(`Error connecting to the ${this.coinManager.getBlockchainApi().name} API.`);
             });
             this.setState({loading: false, refreshing: false});
         }).done()
@@ -154,7 +155,7 @@ export default class ManageAddress extends Component {
                                         >
                                         <Text key={i + '-text'}numberOfLines={1} ellipsizeMode='tail' style={styles.addressName}>{w.name}</Text>
                                             <Text style={styles.addressBalance}>{w.totalBalance}
-                                                <Text style={{fontWeight: '100'}}> {this.globals.getCoinTicker()}</Text>
+                                                <Text style={{fontWeight: '100'}}> {this.coinManager.getCoinTicker()}</Text>
                                             </Text>
                                             <Text style={styles.addressBalance}>${w.valueInDollars}
                                                 <Text style={{fontWeight: '100'}}> USD</Text>

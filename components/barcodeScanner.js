@@ -2,8 +2,8 @@ import React, { Component } from 'react';
 import { Text, View, StyleSheet, Alert, Keyboard } from 'react-native';
 import { NavigationActions } from 'react-navigation';
 import StatelessNavigation from '../utils/navigation';
-import Camera from 'react-native-camera';
 import GlobalConstants from '../globals';
+import Camera from 'react-native-camera';
 
 export default class BarcodeScanner extends Component {
     constructor(props) {

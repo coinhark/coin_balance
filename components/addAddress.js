@@ -35,7 +35,6 @@ export default class AddAddress extends Component {
             invalidAddress: false,
             addressExists: false
         };
-        this.globals = new GlobalConstants();
         this.coinManager = new CoinManager();
         this.dbhelper = new DBHelper();
     }
@@ -96,7 +95,7 @@ export default class AddAddress extends Component {
                     {'This field is required'}
                 </FormValidationMessage>)}
                 {renderIf(this.state.invalidAddress && this.state.address !== '', <FormValidationMessage style>
-                    {'Invalid ' + this.globals.getCoinName() + ' Address'}
+                    {'Invalid ' + this.coinManager.getCoinName() + ' Address'}
                 </FormValidationMessage>)}
                 {renderIf(this.state.addressExists && this.state.address !== '', <FormValidationMessage style>
                     {'This address already exists'}

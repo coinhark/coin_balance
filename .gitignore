@@ -54,7 +54,6 @@ buck-out/
 */fastlane/Preview.html
 */fastlane/screenshots
 
-globals.js
 shim.js
 android/app/release
 coinmanager.js

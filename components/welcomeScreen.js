@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import {ScrollView, RefreshControl, Clipboard, Text, View, StyleSheet, Alert, Image, AsyncStorage, ActivityIndicator, Keyboard} from 'react-native';
 import {FormLabel, FormInput, Button, Card} from 'react-native-elements';
 import GlobalConstants from '../globals';
+import CoinManager from '../coinmanager';
 import DBHelper from '../dbhelper';
 import Numbers from '../utils/numbers';
 
@@ -28,7 +29,7 @@ export default class WelcomeScreen extends Component {
                 }
             }
         }
-        this.globals = new GlobalConstants();
+        this.coinManager = new CoinManager();
         this.dbhelper = new DBHelper();
     }
 
@@ -53,14 +54,14 @@ export default class WelcomeScreen extends Component {
                  this.setState({db: JSON.parse(value)});
                  console.log("db state is now: " + JSON.stringify(this.state.db));
                  if (this.state.db.balanceInfo.addresses.length > 0) {
-                     console.log(`HTTP: ${this.globals.getBlockchainApi().url + JSON.stringify(this.state.db.balanceInfo.addresses)}`);
+                     console.log(`HTTP: ${this.coinManager.getBlockchainApi().url + JSON.stringify(this.state.db.balanceInfo.addresses)}`);
                      Promise.all(this.state.db.balanceInfo.addresses.map(o =>
-                         fetch(this.globals.getBlockchainApi().url + o.inputAddress).then(resp => resp.json())
+                         fetch(this.coinManager.getBlockchainApi().url + o.inputAddress).then(resp => resp.json())
                      )).then(json => {
-                         json = this.globals.formatBlockchainApiResponse(json);
+                         json = this.coinManager.formatBlockchainApiResponse(json);
                          if (!Array.isArray(json) || json[0].balance == null) {
-                             console.log(`Unexpected result from ${this.globals.getBlockchainApi().name} API.`);
-                             this.setState({apiError: `Unexpected result from ${this.globals.getBlockchainApi().name} API.`});
+                             console.log(`Unexpected result from ${this.coinManager.getBlockchainApi().name} API.`);
+                             this.setState({apiError: `Unexpected result from ${this.coinManager.getBlockchainApi().name} API.`});
                          }
                          let ret = json.reduce((agg, elem) => {
                              var tmpDb = this.state.db;
@@ -69,7 +70,7 @@ export default class WelcomeScreen extends Component {
                                      a.totalBalance = elem.balance;
                                  }
                              });
-                             tmpDb.balanceInfo.name = this.globals.getBlockchainApi().name;
+                             tmpDb.balanceInfo.name = this.coinManager.getBlockchainApi().name;
                              tmpDb.balanceInfo.date = new Date().getTime().toString();
                              this.setState({db: tmpDb});
                              AsyncStorage.setItem("db", JSON.stringify(tmpDb));
@@ -78,18 +79,18 @@ export default class WelcomeScreen extends Component {
                          }, 0);
                          this.setState({totalBalance: ret});
                      }).then(bal => {
-                         console.log(`HTTP: ${this.globals.getMarketApi().url}`);
-                         fetch(this.globals.getMarketApi().url)
+                         console.log(`HTTP: ${this.coinManager.getMarketApi().url}`);
+                         fetch(this.coinManager.getMarketApi().url)
                              .then(response => response.json())
                              .then(responseJson => {
-                                 responseJson = this.globals.formatMarketApiResponse(responseJson);
+                                 responseJson = this.coinManager.formatMarketApiResponse(responseJson);
                                  if (!Array.isArray(responseJson) || responseJson[0].price_usd == null) {
-                                     console.log(`Unexpected result from ${this.globals.getMarketApi().name} API.`);
-                                     this.setState({apiError: `Unexpected result from ${this.globals.getMarketApi().name} API.`});
+                                     console.log(`Unexpected result from ${this.coinManager.getMarketApi().name} API.`);
+                                     this.setState({apiError: `Unexpected result from ${this.coinManager.getMarketApi().name} API.`});
                                  }
                                  let exchange = {
                                      "price": responseJson[0].price_usd,
-                                     "name": this.globals.getMarketApi().name,
+                                     "name": this.coinManager.getMarketApi().name,
                                      "date": new Date().getTime().toString()
                                  }
                                  let value = Numbers.formatPrice(this.state.totalBalance * exchange.price, 'US');
@@ -100,12 +101,12 @@ export default class WelcomeScreen extends Component {
                                  console.log("db state after exchange is now: " + JSON.stringify(this.state.db));
                              })
                              .catch(error => {
-                                 this.setState({apiError: `Error connecting to the ${this.globals.getMarketApi().name} API.`});
-                                 console.log(`Error connecting to the ${this.globals.getMarketApi().name} API`);
+                                 this.setState({apiError: `Error connecting to the ${this.coinManager.getMarketApi().name} API.`});
+                                 console.log(`Error connecting to the ${this.coinManager.getMarketApi().name} API`);
                              });
                      }).catch(error => {
-                         this.setState({apiError: `Error connecting to the ${this.globals.getBlockchainApi().name} API.`});
-                         console.log(`Error connecting to the ${this.globals.getBlockchainApi().name} API.`);
+                         this.setState({apiError: `Error connecting to the ${this.coinManager.getBlockchainApi().name} API.`});
+                         console.log(`Error connecting to the ${this.coinManager.getBlockchainApi().name} API.`);
                      });
                  } else {
                      this.setState({loaded: true, refreshing: false});
@@ -132,9 +133,9 @@ export default class WelcomeScreen extends Component {
         if(this.state.loaded) {
             visibletext = (
                 <Card wrapperStyle={styles.card} title="Welcome">
-                    <Image style={styles.symbol} source={this.globals.getAssets().symbol}/>
+                    <Image style={styles.symbol} source={this.coinManager.getAssets().symbol}/>
                     <Text style={styles.viewTitleL}>Total Balance:</Text>
-                    <Text style={styles.viewTitle}>{Numbers.formatBalance(this.state.totalBalance, 'US')} {this.globals.getCoinTicker()}</Text>
+                    <Text style={styles.viewTitle}>{Numbers.formatBalance(this.state.totalBalance, 'US')} {this.coinManager.getCoinTicker()}</Text>
                     <Text wrapperStyle={styles.card} style={styles.viewTitleSM}>${this.state.valueInDollars} USD</Text>
                     <Button
                         raised
@@ -147,7 +148,7 @@ export default class WelcomeScreen extends Component {
         } else {
             visibletext = (
                 <Card wrapperStyle={styles.card} title="Welcome">
-                    <Image style={styles.symbol} source={this.globals.getAssets().symbol}/>
+                    <Image style={styles.symbol} source={this.coinManager.getAssets().symbol}/>
                     <Text style={styles.viewTitleL}>Total Balance</Text>
                     <ActivityIndicator style={styles.viewTitleSpinner} size="small" color="#2196f3" />
                     <Button
@@ -163,7 +164,7 @@ export default class WelcomeScreen extends Component {
         if(this.state.apiError != null) {
             visibletext = (
                 <Card wrapperStyle={styles.card} title="Welcome">
-                    <Image style={styles.symbol} source={this.globals.getAssets().symbol}/>
+                    <Image style={styles.symbol} source={this.coinManager.getAssets().symbol}/>
                     <Text style={styles.viewTitleL}>Total Balance</Text>
                     <Text style={styles.error} size="small">{this.state.apiError}</Text>
                     <Text style={styles.refresh} size="small" onPress={() => this.initView()}>Refresh Now</Text>
@@ -188,8 +189,8 @@ export default class WelcomeScreen extends Component {
                         }>
                 { visibletext }
                 <View style={styles.donateContainer}>
-                    <Text style={styles.donateTitle}>Donate to our {this.globals.getCoinName()} development</Text>
-                    <Text selectable={true} style={styles.donateAddress}>{this.globals.donate}</Text>
+                    <Text style={styles.donateTitle}>Donate to our {this.coinManager.getCoinName()} development</Text>
+                    <Text selectable={true} style={styles.donateAddress}>{this.coinManager.getCoinDonationAddress()}</Text>
                 </View>
             </ScrollView>
         );
