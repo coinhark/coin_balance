@@ -51,6 +51,7 @@ export default class WelcomeScreen extends Component {
                  this.setState({db: JSON.parse(value)});
                  console.log("db state is now: " + JSON.stringify(this.state.db));
                  if (this.state.db.balanceInfo.addresses.length > 0) {
+                     console.log(`HTTP: ${this.globals.getBlockchainApi().url + JSON.stringify(this.state.db.balanceInfo.addresses)}`);
                      Promise.all(this.state.db.balanceInfo.addresses.map(o =>
                          fetch(this.globals.getBlockchainApi().url + o.inputAddress).then(resp => resp.json())
                      )).then(json => {
@@ -75,6 +76,7 @@ export default class WelcomeScreen extends Component {
                          }, 0);
                          this.setState({totalBalance: ret});
                      }).then(bal => {
+                         console.log(`HTTP: ${this.globals.getMarketApi().url}`);
                          fetch(this.globals.getMarketApi().url)
                              .then(response => response.json())
                              .then(responseJson => {
