@@ -1,110 +1,70 @@
 # Litecoin Balance
 
-Litecoin Balance is a react-native app designed for iOS and Android.
+Coin Balance is a react-native app designed for iOS and Android.
 
 ## Getting started
-This project requires a globals.js file to be in the root.  This file often contains private data so must be added on a per-project basis.  We provide a basic file to get your project building, however endpoints will need to be supplied:  
+This project requires a coinmainager.js file to be in the root.  This file often contains private data so must be managed on a per-project basis.  We provide a sample file to get your project building, however endpoints will need to be supplied:  
 
 ```javascript
 'use strict'
 import WAValidator from 'wallet-address-validator';
 import { AsyncStorage } from 'react-native';
+import CoinValidation from './utils/coinvalidation';
+import GlobalConstants from './globals';
 
-class GlobalConstants {
+class CoinManager {
 
     constructor() {
         this.bitcoin = require('bitcoinjs-lib');
+        this.ethereum = require('ethereum-address');
+        this.validation = new CoinValidation();
 
-        // Edit this for cointype (Ex: ltc, etc)
-        this.coin = 'ltc';
-
-        this.donate = 'LVwutf6xmtKGXtS9KsgCUMHEmoEix7TvQj'
+        this.coin = GlobalConstants.getAppCoin();
 
         this.coinInfo = {
             "ltc": {
                 "name": "Litecoin",
-                "ticker": "LTC"
+                "ticker": "LTC",
+                "donation": "LVwutf6xmtKGXtS9KsgCUMHEmoEix7TvQj"
+            },
+            "btc": {
+                "name": "Bitcoin",
+                "ticker": "BTC",
+                "donation": "1B2efQ6jikK7MnAGimZb77JgvCBVJQziLS"
             }
         };
 
         this.marketApi = {
             "ltc": {
-                "name": "CoinMarketCap-LTC",
-                "url": 'https://api.getPriceByCoinTicker.example/'
+                "name": "Market-LTC",
+                "url": 'https://api.someLTCMarketAPI.example'
+            },
+            "btc": {
+                "name": "Market-BTC",
+                "url": 'https://api.someBTCMarketAPI.example'
             }
         };
 
         this.blockchainApi = {
             "ltc": {
                 "name": "Coinhark-LTC",
-                "url": 'https://apt.getLTCAddressBalance.example/address/'
+                "url": 'https://api.someLTCBlockchainAPI.example/addr/'
+            },
+            "btc": {
+                "name": "Coinhark-BTC",
+                "url": 'https://api.someBTCBlockchainAPI.example/addr/'
             }
         };
-
-        this.bareDb = {
-            "balanceInfo": {
-                "name": "Coinhark API",
-                "date": "1318464000",
-                "totalBalance": "0.00000000",
-                "addresses": []
-            },
-            "exchange": {
-                "price": 0.00,
-                "date": "1318464000",
-                "name": "CoinMarketCap API",
-            }
-        }
 
         // Until require can handle non-literal strings, we do this. =/
         this.assets = {
           "ltc": {
             "symbol": require("./assets/images/litecoin_symbol.png")
+          },
+          "btc": {
+            "symbol": require("./assets/images/litecoin_symbol.png")
           }
         }
-
-        /*
-        Example db:
-        {
-            "balanceInfo": {
-                "name": "chain.so/api",
-                "date": "1513701489945",
-                "totalBalance": "345.33420002",
-                "addresses": [
-                    {
-                      "address":"LVwutf6xmtKGXtS9KsgCUMHEmoEix7TvQj",
-                      "inputAddress":"LVwutf6xmtKGXtS9KsgCUMHEmoEix7TvQj",
-                      "name":"Donations",
-                      "totalBalance":"0.05769462",
-                      "valueInDollars":"10.43"
-                    },
-                    {
-                      "address":"LZM4ztEMzk9MY9ikC8jE52nTeBHhcL9viW",
-                      "inputAddress":"LZM4ztEMzk9MY9ikC8jE52nTeBHhcL9viW",
-                      "name":"Random Address",
-                      "totalBalance":"5.9",
-                      "valueInDollars":"1,067.02"
-                    },
-                    {
-                      "address":"3CuMqrgosjygLtVA4oF7RTzRiUNKvRznkF",
-                      "inputAddress":"MK7W9k6mprq79Pm4AgETF7Eq3AxmwahBCT",
-                      "name":"Segwit Address Convert",
-                      "totalBalance":0,
-                      "valueInDollars":"0.00"
-                    }
-                ]
-            },
-            "exchange": {
-                "price":"354.402",
-                "name":"CoinMarketCap",
-                "date":"1513701489945"
-            }
-        }
-        */
-    }
-
-    // Edit this for cointype (Ex: Litecoin Balance, Bitcoin Balance, etc)
-    static getAppName() {
-        return "Litecoin Balance";
     }
 
     getCoinName() {
@@ -115,6 +75,10 @@ class GlobalConstants {
         return this.coinInfo[this.coin].ticker;
     }
 
+    getCoinDonationAddress() {
+        return this.coinInfo[this.coin].donation;
+    }
+
     getMarketApi() {
         return this.marketApi[this.coin];
     }
@@ -123,8 +87,14 @@ class GlobalConstants {
         return this.blockchainApi[this.coin];
     }
 
+    getAssets() {
+        return this.assets[this.coin];
+    }
+
     formatMarketApiResponse(json) {
       if(this.coin == 'ltc') {
+        return json;
+      } else if(this.coin == 'btc') {
         return json;
       } else {
         console.log("error: unknown coin: " + this.coin);
@@ -135,53 +105,27 @@ class GlobalConstants {
     formatBlockchainApiResponse(json) {
       if(this.coin == 'ltc') {
         return json;
+      } else if(this.coin == 'btc') {
+        return json;
       } else {
         console.log("error: unknown coin: " + this.coin);
         return {};
       }
     }
 
-    getAssets() {
-        return this.assets[this.coin];
-    }
-
-    validateAddress(address, component) {
+    validateAddress(addressObj, component) {
       if(this.coin == 'ltc') {
-        let validationAddress = component.state.address;
-        if (validationAddress.startsWith('3')) {
-            const decoded = this.bitcoin.address.fromBase58Check(validationAddress);
-            let version = decoded.version;
-            if (version === 5) {
-                version = 50;
-            }
-            address.inputAddress = this.bitcoin.address.toBase58Check(decoded['hash'], version);
-        }
-        if (validationAddress.startsWith('M')) {
-            const decoded = this.bitcoin.address.fromBase58Check(validationAddress);
-            let version = decoded.version;
-            if (version === 50) {
-                version = 5;
-            }
-            validationAddress = this.bitcoin.address.toBase58Check(decoded['hash'], version);
-        }
-        let valid = WAValidator.validate(validationAddress, this.getCoinName().toLowerCase());
-        if (valid) {
-            let tmpDb = component.state.db;
-            tmpDb.balanceInfo.addresses.push(address);
-            component.setState({db: tmpDb});
-            AsyncStorage.setItem("db", JSON.stringify(component.state.db));
-            component.props.navigation.navigate('ManageAddresses');
-        } else {
-            component.setState({invalidAddress: true});
-        }
-    } else {
-      console.log("error: unknown coin: " + this.coin);
+        return this.validation.processAndValidateBitcoinBasedCoin(addressObj, this.coin, component);
+      } else if(this.coin == 'btc') {
+        return this.validation.processAndValidateBitcoinBasedCoin(addressObj, this.coin, component);
+      } else {
+          console.log(`Error: Unknown coin: ${coin}`);
+          return false;
+      }
     }
-  }
 }
 
-export default GlobalConstants;
-
+export default CoinManager;
 ```
 
 ## How to run with Android Studio
@@ -207,8 +151,13 @@ In that case I just run:
 ## How to run with mac
 Coming soon
 
+## How to run tests
+```bash
+npm run test
+```
+
 ## Purpose
-The app is meant to simply aggregate the balances of LTC addresses, but is designed to be flexible for any cryptocurrency.
+The app is meant to simply aggregate the balances of cryptocurrency addresses, and is designed to be flexible for any cryptocurrency.
 
 ## To Do
 

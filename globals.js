@@ -6,12 +6,22 @@ class GlobalConstants {
 
     }
 
-    // Edit this for cointype (Ex: Litecoin Balance, Bitcoin Balance, etc)
+    // Edit this for cointype (Ex: ltc, btc, etc)
+    static getAppCoin() {
+      return 'ltc';
+    }
+
     static getAppName() {
-        //return "Litecoin Balance";
-        //return "Bitcoin Balance";
-        return "Ethereum Balance";
-        //return "Stellar Balance";
+      switch(GlobalConstants.getAppCoin()) {
+        case 'ltc':
+          return "Litecoin Balance";
+        case 'btc':
+          return "Bitcoin Balance";
+        case 'eth':
+          return "Ethereum Balance";
+        case 'xlm':
+          return "Stellar Balance";
+      }
     }
 }
 

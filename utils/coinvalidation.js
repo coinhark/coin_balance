@@ -9,7 +9,7 @@ class CoinValidation {
     }
 
     isLegacySegwitOrMultisig(address, coin) {
-      if (address.startsWith('3')) {addressObj
+      if (address.startsWith('3')) {
           const decoded = this.bitcoin.address.fromBase58Check(address);
           let version = decoded.version;
           if (version === 5) {
