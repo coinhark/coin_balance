@@ -2,8 +2,10 @@ import React, { Component } from 'react';
 import { Text, TextInput, View, StyleSheet, Alert, AsyncStorage } from 'react-native';
 import { FormLabel, FormInput, FormValidationMessage, Button, Card } from 'react-native-elements'
 import GlobalConstants from '../globals';
+import CoinManager from '../coinmanager';
 import renderIf from '../utils/renderIf.js';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import DBHelper from '../dbhelper';
 
 require('../shim');
 
@@ -34,6 +36,8 @@ export default class AddAddress extends Component {
             addressExists: false
         };
         this.globals = new GlobalConstants();
+        this.coinManager = new CoinManager();
+        this.dbhelper = new DBHelper();
     }
 
     componentWillMount() {
@@ -71,7 +75,9 @@ export default class AddAddress extends Component {
         if (this.state.db.balanceInfo.addresses.find(o => o.address === this.state.address)) {
             this.setState({addressExists: true});
         } else {
-            this.globals.validateAddress(address, this);
+          this.coinManager.validateAddress(address, this);
+          // Save changes from processAndValidateAddress()
+          this.dbhelper.save("db", JSON.stringify(this.state.db));
         }
     }
 

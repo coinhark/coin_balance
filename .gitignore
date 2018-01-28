@@ -57,3 +57,4 @@ buck-out/
 globals.js
 shim.js
 android/app/release
+coinmanager.js

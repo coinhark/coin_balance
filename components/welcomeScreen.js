@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import {ScrollView, RefreshControl, Clipboard, Text, View, StyleSheet, Alert, Image, AsyncStorage, ActivityIndicator, Keyboard} from 'react-native';
 import {FormLabel, FormInput, Button, Card} from 'react-native-elements';
 import GlobalConstants from '../globals';
+import DBHelper from '../dbhelper';
 import Numbers from '../utils/numbers';
 
 export default class WelcomeScreen extends Component {
@@ -28,6 +29,7 @@ export default class WelcomeScreen extends Component {
             }
         }
         this.globals = new GlobalConstants();
+        this.dbhelper = new DBHelper();
     }
 
     componentDidMount() {
@@ -42,9 +44,9 @@ export default class WelcomeScreen extends Component {
          AsyncStorage.getItem("db").then((value) => {
              if (value == null) {
                  // init db
-                 AsyncStorage.setItem("db", JSON.stringify(this.globals.bareDb));
+                 AsyncStorage.setItem("db", JSON.stringify(this.dbhelper.bareDb));
                  console.log("Creating new db of: " + JSON.stringify(this.state.db));
-                 this.setState({db: this.globals.bareDb})
+                 this.setState({db: this.dbhelper.bareDb})
                  console.log("db state is now bare: " + JSON.stringify(this.state.db));
                  this.setState({loaded: true, refreshing: false});
              } else {
