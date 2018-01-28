@@ -54,6 +54,7 @@ export default class WelcomeScreen extends Component {
                      Promise.all(this.state.db.balanceInfo.addresses.map(o =>
                          fetch(this.globals.getBlockchainApi().url + o.inputAddress).then(resp => resp.json())
                      )).then(json => {
+                         json = this.globals.formatBlockchainApiResponse(json);
                          if (!Array.isArray(json) || json[0].balance == null) {
                              console.log(`Unexpected result from ${this.globals.getBlockchainApi().name} API.`);
                              this.setState({apiError: `Unexpected result from ${this.globals.getBlockchainApi().name} API.`});
@@ -77,6 +78,7 @@ export default class WelcomeScreen extends Component {
                          fetch(this.globals.getMarketApi().url)
                              .then(response => response.json())
                              .then(responseJson => {
+                                 responseJson = this.globals.formatMarketApiResponse(responseJson);
                                  if (!Array.isArray(responseJson) || responseJson[0].price_usd == null) {
                                      console.log(`Unexpected result from ${this.globals.getMarketApi().name} API.`);
                                      this.setState({apiError: `Unexpected result from ${this.globals.getMarketApi().name} API.`});
@@ -114,7 +116,7 @@ export default class WelcomeScreen extends Component {
     }
 
     static navigationOptions = ({navigate, navigation}) => ({
-        title: GlobalConstants.getAppName() + " Balance",
+        title: GlobalConstants.getAppName(),
         headerLeft: null,
         gesturesEnabled: false
     })
@@ -126,7 +128,7 @@ export default class WelcomeScreen extends Component {
         if(this.state.loaded) {
             visibletext = (
                 <Card wrapperStyle={styles.card} title="Welcome">
-                    <Image style={styles.symbol} source={require('../assets/images/litecoin_symbol.png')}/>
+                    <Image style={styles.symbol} source={this.globals.getAssets().symbol}/>
                     <Text style={styles.viewTitleL}>Total Balance:</Text>
                     <Text style={styles.viewTitle}>{Numbers.formatBalance(this.state.totalBalance, 'US')} {this.globals.getCoinTicker()}</Text>
                     <Text wrapperStyle={styles.card} style={styles.viewTitleSM}>${this.state.valueInDollars} USD</Text>
@@ -141,7 +143,7 @@ export default class WelcomeScreen extends Component {
         } else {
             visibletext = (
                 <Card wrapperStyle={styles.card} title="Welcome">
-                    <Image style={styles.symbol} source={require('../assets/images/litecoin_symbol.png')}/>
+                    <Image style={styles.symbol} source={this.globals.getAssets().symbol}/>
                     <Text style={styles.viewTitleL}>Total Balance</Text>
                     <ActivityIndicator style={styles.viewTitleSpinner} size="small" color="#2196f3" />
                     <Button
@@ -157,7 +159,7 @@ export default class WelcomeScreen extends Component {
         if(this.state.apiError != null) {
             visibletext = (
                 <Card wrapperStyle={styles.card} title="Welcome">
-                    <Image style={styles.symbol} source={require('../assets/images/litecoin_symbol.png')}/>
+                    <Image style={styles.symbol} source={this.globals.getAssets().symbol}/>
                     <Text style={styles.viewTitleL}>Total Balance</Text>
                     <Text style={styles.error} size="small">{this.state.apiError}</Text>
                     <Text style={styles.refresh} size="small" onPress={() => this.initView()}>Refresh Now</Text>
