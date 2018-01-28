@@ -1,4 +1,4 @@
-# Litecoin Balance
+# Coin Balance
 
 Coin Balance is a react-native app designed for iOS and Android.
 
