@@ -12,6 +12,7 @@ export default class WelcomeScreen extends Component {
         this.state = {
             totalBalance: 0.00000000,
             valueInDollars: 0.00,
+            currentPrice: 0.00,
             loaded: false,
             refreshing: false,
             apiError: null,
@@ -80,39 +81,59 @@ export default class WelcomeScreen extends Component {
                          this.setState({totalBalance: ret});
                      }).then(bal => {
                          console.log(`HTTP: ${this.coinManager.getMarketApi().url}`);
-                         fetch(this.coinManager.getMarketApi().url)
-                             .then(response => response.json())
-                             .then(responseJson => {
-                                 responseJson = this.coinManager.formatMarketApiResponse(responseJson);
-                                 if (!Array.isArray(responseJson) || responseJson[0].price_usd == null) {
-                                     console.log(`Unexpected result from ${this.coinManager.getMarketApi().name} API.`);
-                                     this.setState({apiError: `Unexpected result from ${this.coinManager.getMarketApi().name} API.`});
-                                 }
-                                 let exchange = {
-                                     "price": responseJson[0].price_usd,
-                                     "name": this.coinManager.getMarketApi().name,
-                                     "date": new Date().getTime().toString()
-                                 }
-                                 let value = Numbers.formatPrice(this.state.totalBalance * exchange.price, 'US');
-                                 let tmpDb = this.state.db;
-                                 tmpDb.exchange = exchange;
-                                 this.setState({valueInDollars: value, loaded: true, refreshing: false, db: tmpDb});
-                                 AsyncStorage.setItem("db", JSON.stringify(this.state.db));
-                                 console.log("db state after exchange is now: " + JSON.stringify(this.state.db));
-                             })
-                             .catch(error => {
-                                 this.setState({apiError: `Error connecting to the ${this.coinManager.getMarketApi().name} API.`});
-                                 console.log(`Error connecting to the ${this.coinManager.getMarketApi().name} API`);
-                             });
+                         this.getMarketData();
                      }).catch(error => {
                          this.setState({apiError: `Error connecting to the ${this.coinManager.getBlockchainApi().name} API.`});
                          console.log(`Error connecting to the ${this.coinManager.getBlockchainApi().name} API.`);
                      });
                  } else {
+                     this.getMarketData();
                      this.setState({loaded: true, refreshing: false});
                  }
              }
          }).done();
+     }
+
+     getMarketData() {
+         fetch(this.coinManager.getMarketApi().url)
+             .then(response => response.json())
+             .then(responseJson => {
+                 console.log('Coinmarketcap: ' + JSON.stringify(responseJson));
+                 responseJson = this.coinManager.formatMarketApiResponse(responseJson);
+                 if (!Array.isArray(responseJson) || responseJson[0].price_usd == null) {
+                     console.log(`Unexpected result from ${this.coinManager.getMarketApi().name} API.`);
+                     this.setState({apiError: `Unexpected result from ${this.coinManager.getMarketApi().name} API.`});
+                 }
+                 let exchange = {
+                     "dailyChange": responseJson[0].percent_change_24h,
+                     "dailyVolume": responseJson[0]['24h_volume_usd'],
+                     "marketCap": responseJson[0].market_cap_usd,
+                     "price": responseJson[0].price_usd,
+                     "name": this.coinManager.getMarketApi().name,
+                     "date": new Date().getTime().toString()
+                 }
+                 let value = Numbers.formatPrice(this.state.totalBalance * exchange.price, 'US');
+                 let price = exchange.price;
+                 console.log('The price is ' + exchange.price);
+                 let tmpDb = this.state.db;
+                 tmpDb.exchange = exchange;
+                 this.setState({
+                     valueInDollars: value,
+                     dailyChange: exchange.dailyChange,
+                     dailyVolume: exchange.dailyVolume,
+                     marketCap: exchange.marketCap,
+                     currentPrice: price,
+                     loaded: true,
+                     refreshing: false,
+                     db: tmpDb
+                 });
+                 AsyncStorage.setItem("db", JSON.stringify(this.state.db));
+                 console.log("db state after exchange is now: " + JSON.stringify(this.state.db));
+             })
+             .catch(error => {
+                 this.setState({apiError: `Error connecting to the ${this.coinManager.getMarketApi().name} API.`});
+                 console.log(`Error connecting to the ${this.coinManager.getMarketApi().name} API`);
+             });
      }
 
     _onRefresh() {
@@ -123,7 +144,9 @@ export default class WelcomeScreen extends Component {
     static navigationOptions = ({navigate, navigation}) => ({
         title: GlobalConstants.getAppName(),
         headerLeft: null,
-        gesturesEnabled: false
+        gesturesEnabled: false,
+        headerStyle: { backgroundColor: '#375374' },
+        headerTitleStyle: { color: '#ffffff' }
     })
 
     render() {
@@ -132,18 +155,57 @@ export default class WelcomeScreen extends Component {
         let visibletext = null;
         if(this.state.loaded) {
             visibletext = (
-                <Card wrapperStyle={styles.card} title="Welcome">
-                    <Image style={styles.symbol} source={this.coinManager.getAssets().symbol}/>
-                    <Text style={styles.viewTitleL}>Total Balance:</Text>
-                    <Text style={styles.viewTitle}>{Numbers.formatBalance(this.state.totalBalance, 'US')} {this.coinManager.getCoinTicker()}</Text>
-                    <Text wrapperStyle={styles.card} style={styles.viewTitleSM}>${this.state.valueInDollars} USD</Text>
-                    <Button
-                        raised
-                        onPress={() => navigate('ManageAddresses')}
-                        backgroundColor={'#2196f3'}
-                        title='Manage Addresses'
-                    />
-                </Card>
+                <ScrollView style={styles.darkBackground}>
+                    <View style={styles.flatWrapTop}>
+                        <Image style={styles.symbol} source={this.coinManager.getAssets().symbol}/>
+                        <Text style={styles.subTitle}>TOTAL BALANCE:</Text>
+                        <Text style={styles.coinType}>{Numbers.formatBalance(this.state.totalBalance, 'US')} {this.coinManager.getCoinTicker()}</Text>
+                        <Text style={styles.viewTitleL}>${this.state.currentPrice} USD</Text>
+                    </View>
+                    <View style={styles.priceInfo}>
+                        <View style={styles.price}>
+                            <Text style={{color: '#ffffff', fontSize: 12}}>24H Change</Text>
+                            <Text style={{color: '#ffffff', fontWeight: 'bold'}}>{this.state.dailyChange}</Text>
+                        </View>
+                        <View style={styles.price}>
+                            <Text style={{color: '#ffffff'}}>24H Volume</Text>
+                            <Text style={{color: '#ffffff', fontWeight: 'bold'}}>{this.state.dailyVolume}</Text>
+                        </View>
+                        <View style={styles.price}>
+                            <Text style={{color: '#ffffff'}}>Market Cap</Text>
+                            <Text style={{color: '#ffffff', fontWeight: 'bold'}}>{this.state.marketCap}</Text>
+                        </View>
+                    </View>
+                    <View style={styles.currentPrice}>
+                        <Text style={{color: '#ffffff'}}>Current Price: {this.state.currentPrice}</Text>
+                    </View>
+                    <View>
+                        <Button
+                            raised
+                            onPress={() => navigate('ManageAddresses')}
+                            backgroundColor={'#2196f3'}
+                            title='Manage Addresses'
+                        />
+                    </View>
+                </ScrollView>
+                /*<ScrollView>
+                    <View style={styles.flatWrapTop}>
+                        <View style={{flex: 1, flexDirection: 'row'}}>
+                            <Image style={styles.symbol} source={this.coinManager.getAssets().symbol}/>
+                            <Text style={styles.viewTitleL}>Current Price: {this.state.currentPrice}</Text>
+                        </View>
+                        <Text style={styles.viewTitleL}>Total Balance: {Numbers.formatBalance(this.state.totalBalance, 'US')} {this.coinManager.getCoinTicker()}</Text>
+                        <Text wrapperStyle={styles.card} style={styles.viewTitleSM}>${this.state.valueInDollars} USD</Text>
+                    </View>
+                    <View style={styles.flatWrapBottom}>
+                        <Button
+                            raised
+                            onPress={() => navigate('ManageAddresses')}
+                            backgroundColor={'#2196f3'}
+                            title='Manage Addresses'
+                        />
+                    </View>
+                </ScrollView>*/
             );
         } else {
             visibletext = (
@@ -179,7 +241,7 @@ export default class WelcomeScreen extends Component {
         }
 
         return (
-            <ScrollView horizontal={false}
+            <ScrollView style={styles.darkBackground} horizontal={false}
                         refreshControl={
                             <RefreshControl
                                 enabled={true}
@@ -198,40 +260,83 @@ export default class WelcomeScreen extends Component {
 }
 
 const styles = StyleSheet.create({
+    darkBackground: {
+        backgroundColor: '#486C96'
+    },
     card: {
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 0
     },
+    priceInfo: {
+        flex: 1,
+        flexDirection: 'row',
+        justifyContent: 'center',
+        marginTop: 16,
+    },
+    price: {
+        flex: .3,
+        alignItems: 'center'
+    },
+    currentPrice: {
+        flex: 0.8,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#ffffff20',
+        paddingTop: 10,
+        paddingBottom: 10,
+        marginTop: 12,
+        marginBottom: 12
+    },
+    flatWrapTop: {
+        backgroundColor: '#486C96',
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+    flatWrapBottom: {
+        backgroundColor: '#ffffff',
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
     error: {
         marginTop: 28,
         marginBottom: 28,
-        color: '#DC143C',
+        color: '#DC143C'
     },
     viewTitleSpinner: {
         marginTop: 28,
         marginBottom: 28
     },
-    viewTitleL: {
-        marginTop: 35,
-        marginBottom: 5,
-        fontSize: 20,
+    subTitle: {
+        color: '#ffffff',
         fontWeight: 'bold',
+        marginTop: 10,
+        fontSize: 14
+    },
+    coinType: {
+        marginTop: 4,
+        color: '#fff',
+        fontSize: 18
+    },
+    viewTitleL: {
+        marginTop: 3,
+        marginBottom: 10,
+        fontSize: 18,
+        fontWeight: '200',
         textAlign: 'left',
-        color: '#34495e',
+        color: '#ffffff',
     },
     viewTitle: {
         margin: 5,
         fontSize: 18,
         fontWeight: 'bold',
         textAlign: 'left',
-        color: '#34495e',
+        color: '#ffffff',
     },
     viewTitleSM: {
-        marginBottom: 24,
         fontSize: 14,
         textAlign: 'left',
-        color: '#34495e',
+        color: '#ffffff',
     },
     donateContainer: {
         flex: 1,
@@ -239,13 +344,14 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         marginTop: 36,
+        backgroundColor: '#486C96'
     },
     donateTitle: {
         margin: 5,
         fontSize: 14,
         fontWeight: 'bold',
         textAlign: 'center',
-        color: '#34495e',
+        color: '#ffffff',
         marginBottom: 4
     },
     donateAddress: {
@@ -253,7 +359,7 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontWeight: 'bold',
         textAlign: 'center',
-        color: '#34495e',
+        color: '#ffffff',
         marginBottom: 8,
     },
     rightButton: {
@@ -262,9 +368,13 @@ const styles = StyleSheet.create({
         color: '#555555',
     },
     symbol: {
-        width: 120,
-        height: 120,
+        marginTop: 30,
+        marginBottom: 10,
+        width: 60,
+        height: 60,
         justifyContent: 'center',
         alignItems: 'center',
     }
+    /*<Text style={styles.viewTitleSM}>Total Balance: {Numbers.formatBalance(this.state.totalBalance, 'US')} {this.coinManager.getCoinTicker()}</Text>
+                            <Text style={styles.viewTitleSM}>${this.state.valueInDollars} USD</Text>*/
 });

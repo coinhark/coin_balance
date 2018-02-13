@@ -8,7 +8,7 @@ class GlobalConstants {
 
     // Edit this for cointype (Ex: ltc, btc, etc)
     static getAppCoin() {
-      return 'ltc';
+      return 'eth';
     }
 
     static getAppName() {
