@@ -5,6 +5,7 @@ import GlobalConstants from '../globals';
 import CoinManager from '../coinmanager';
 import DBHelper from '../dbhelper';
 import Numbers from '../utils/numbers';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 export default class WelcomeScreen extends Component {
     constructor(props) {
@@ -13,6 +14,9 @@ export default class WelcomeScreen extends Component {
             totalBalance: 0.00000000,
             valueInDollars: 0.00,
             currentPrice: 0.00,
+            marketCap: 0.00,
+            dailyChange: 0.00,
+            dailyVolume: 0.00,
             loaded: false,
             refreshing: false,
             apiError: null,
@@ -30,6 +34,7 @@ export default class WelcomeScreen extends Component {
                 }
             }
         }
+        this.globals = GlobalConstants;
         this.coinManager = new CoinManager();
         this.dbhelper = new DBHelper();
     }
@@ -112,6 +117,13 @@ export default class WelcomeScreen extends Component {
                      "name": this.coinManager.getMarketApi().name,
                      "date": new Date().getTime().toString()
                  }
+                 if (exchange.dailyChange.includes('-')) {
+                     this.dailyChangeColor = '#e74c3c';
+                     this.changeIcon = <Icon style={{fontSize: 20, color: '#e74c3c'}} name="ios-arrow-round-down"/>;
+                 } else {
+                     this.dailyChangeColor = '#27ae60';
+                     this.changeIcon = <Icon style={{fontSize: 18, color: '#27ae60'}} name="ios-arrow-round-up"/>;
+                 }
                  let value = Numbers.formatPrice(this.state.totalBalance * exchange.price, 'US');
                  let price = exchange.price;
                  console.log('The price is ' + exchange.price);
@@ -145,7 +157,7 @@ export default class WelcomeScreen extends Component {
         title: GlobalConstants.getAppName(),
         headerLeft: null,
         gesturesEnabled: false,
-        headerStyle: { backgroundColor: '#375374' },
+        headerStyle: { backgroundColor: '#39679A' },
         headerTitleStyle: { color: '#ffffff' }
     })
 
@@ -160,24 +172,24 @@ export default class WelcomeScreen extends Component {
                         <Image style={styles.symbol} source={this.coinManager.getAssets().symbol}/>
                         <Text style={styles.subTitle}>TOTAL BALANCE:</Text>
                         <Text style={styles.coinType}>{Numbers.formatBalance(this.state.totalBalance, 'US')} {this.coinManager.getCoinTicker()}</Text>
-                        <Text style={styles.viewTitleL}>${this.state.currentPrice} USD</Text>
+                        <Text style={styles.viewTitleL}>${this.state.valueInDollars} USD</Text>
+                    </View>
+                    <View style={styles.currentPrice}>
+                        <Text style={{color: '#0c0c0c'}}>Market Price: ${this.globals.roundTwoDecimals(this.state.currentPrice)}</Text>
                     </View>
                     <View style={styles.priceInfo}>
                         <View style={styles.price}>
-                            <Text style={{color: '#ffffff', fontSize: 12}}>24H Change</Text>
-                            <Text style={{color: '#ffffff', fontWeight: 'bold'}}>{this.state.dailyChange}</Text>
+                            <Text style={{color: '#0c0c0c'}}>24H Volume</Text>
+                            <Text style={{color: '#0c0c0c', fontWeight: 'bold'}}>{this.state.dailyVolume}</Text>
                         </View>
                         <View style={styles.price}>
-                            <Text style={{color: '#ffffff'}}>24H Volume</Text>
-                            <Text style={{color: '#ffffff', fontWeight: 'bold'}}>{this.state.dailyVolume}</Text>
+                            <Text style={{color: '#0c0c0c', fontSize: 12}}>24H Change</Text>
+                            <Text style={{color: '#0c0c0c', fontWeight: 'bold', fontSize: 16, color:this.dailyChangeColor}}>{this.changeIcon} {this.state.dailyChange}%</Text>
                         </View>
                         <View style={styles.price}>
-                            <Text style={{color: '#ffffff'}}>Market Cap</Text>
-                            <Text style={{color: '#ffffff', fontWeight: 'bold'}}>{this.state.marketCap}</Text>
+                            <Text style={{color: '#0c0c0c'}}>Market Cap</Text>
+                            <Text style={{color: '#0c0c0c', fontWeight: 'bold'}}>{(this.state.marketCap)}</Text>
                         </View>
-                    </View>
-                    <View style={styles.currentPrice}>
-                        <Text style={{color: '#ffffff'}}>Current Price: {this.state.currentPrice}</Text>
                     </View>
                     <View>
                         <Button
@@ -261,7 +273,7 @@ export default class WelcomeScreen extends Component {
 
 const styles = StyleSheet.create({
     darkBackground: {
-        backgroundColor: '#486C96'
+        backgroundColor: '#3A5A86'
     },
     card: {
         justifyContent: 'center',
@@ -272,26 +284,33 @@ const styles = StyleSheet.create({
         flex: 1,
         flexDirection: 'row',
         justifyContent: 'center',
-        marginTop: 16,
+        backgroundColor: '#f7f7f7',
+        borderWidth: 1,
+        borderTopColor: '#cccccc',
+        paddingTop: 12,
+        paddingBottom: 12,
+        marginBottom: 28
     },
     price: {
         flex: .3,
-        alignItems: 'center'
+        alignItems: 'center',
     },
     currentPrice: {
         flex: 0.8,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#ffffff20',
-        paddingTop: 10,
-        paddingBottom: 10,
-        marginTop: 12,
-        marginBottom: 12
+        backgroundColor: '#f7f7f7',
+        paddingTop: 16,
+        paddingBottom: 16
     },
     flatWrapTop: {
-        backgroundColor: '#486C96',
+        backgroundColor: '#3A5A86',
         justifyContent: 'center',
-        alignItems: 'center'
+        alignItems: 'center',
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 0.5,
+        shadowRadius: 2,
+        zIndex: 99
     },
     flatWrapBottom: {
         backgroundColor: '#ffffff',
@@ -314,7 +333,6 @@ const styles = StyleSheet.create({
         fontSize: 14
     },
     coinType: {
-        marginTop: 4,
         color: '#fff',
         fontSize: 18
     },
@@ -344,7 +362,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         marginTop: 36,
-        backgroundColor: '#486C96'
+        backgroundColor: '#f7f7f7'
     },
     donateTitle: {
         margin: 5,

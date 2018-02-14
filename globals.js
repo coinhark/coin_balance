@@ -6,6 +6,10 @@ class GlobalConstants {
 
     }
 
+    static roundTwoDecimals(number) {
+        return parseFloat(number).toFixed(2);
+    }
+
     // Edit this for cointype (Ex: ltc, btc, etc)
     static getAppCoin() {
       return 'eth';
