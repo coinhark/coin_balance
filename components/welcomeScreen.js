@@ -119,10 +119,10 @@ export default class WelcomeScreen extends Component {
                  }
                  if (exchange.dailyChange.includes('-')) {
                      this.dailyChangeColor = '#e74c3c';
-                     this.changeIcon = <Icon style={{fontSize: 20, color: '#e74c3c'}} name="ios-arrow-round-down"/>;
+                     this.changeIcon = <Icon style={{fontSize: 20, color: '#e74c3c'}} name="md-arrow-dropdown"/>;
                  } else {
                      this.dailyChangeColor = '#27ae60';
-                     this.changeIcon = <Icon style={{fontSize: 18, color: '#27ae60'}} name="ios-arrow-round-up"/>;
+                     this.changeIcon = <Icon style={{fontSize: 18, color: '#27ae60', marginLeft: 16}} name="md-arrow-dropup"/>;
                  }
                  let value = Numbers.formatPrice(this.state.totalBalance * exchange.price, 'US');
                  let price = exchange.price;
@@ -157,7 +157,7 @@ export default class WelcomeScreen extends Component {
         title: GlobalConstants.getAppName(),
         headerLeft: null,
         gesturesEnabled: false,
-        headerStyle: { backgroundColor: '#39679A' },
+        headerStyle: { backgroundColor: '#27313f' },
         headerTitleStyle: { color: '#ffffff' }
     })
 
@@ -175,23 +175,20 @@ export default class WelcomeScreen extends Component {
                         <Text style={styles.viewTitleL}>${this.state.valueInDollars} USD</Text>
                     </View>
                     <View style={styles.currentPrice}>
-                        <Text style={{color: '#0c0c0c'}}>Market Price: ${this.globals.roundTwoDecimals(this.state.currentPrice)}</Text>
+                        <Text style={{color: '#0c0c0c', paddingRight: 10}}>Current Price: ${this.globals.roundTwoDecimals(this.state.currentPrice)}</Text>
+                        <Text style={{color: '#0c0c0c', fontWeight: 'bold', fontSize: 14, color:this.dailyChangeColor}}>{this.changeIcon} {this.state.dailyChange}%</Text>
                     </View>
                     <View style={styles.priceInfo}>
                         <View style={styles.price}>
                             <Text style={{color: '#0c0c0c'}}>24H Volume</Text>
-                            <Text style={{color: '#0c0c0c', fontWeight: 'bold'}}>{this.state.dailyVolume}</Text>
-                        </View>
-                        <View style={styles.price}>
-                            <Text style={{color: '#0c0c0c', fontSize: 12}}>24H Change</Text>
-                            <Text style={{color: '#0c0c0c', fontWeight: 'bold', fontSize: 16, color:this.dailyChangeColor}}>{this.changeIcon} {this.state.dailyChange}%</Text>
+                            <Text style={{color: '#0c0c0c', fontWeight: 'bold'}}>${Numbers.formatPrice(this.state.dailyVolume)}</Text>
                         </View>
                         <View style={styles.price}>
                             <Text style={{color: '#0c0c0c'}}>Market Cap</Text>
-                            <Text style={{color: '#0c0c0c', fontWeight: 'bold'}}>{(this.state.marketCap)}</Text>
+                            <Text style={{color: '#0c0c0c', fontWeight: 'bold'}}>${Numbers.formatPrice(this.state.marketCap)}</Text>
                         </View>
                     </View>
-                    <View>
+                    <View style={{backgroundColor: '#313E4F', paddingTop: 50, paddingBottom: 28}}>
                         <Button
                             raised
                             onPress={() => navigate('ManageAddresses')}
@@ -273,7 +270,7 @@ export default class WelcomeScreen extends Component {
 
 const styles = StyleSheet.create({
     darkBackground: {
-        backgroundColor: '#3A5A86'
+        backgroundColor: '#313E4F'
     },
     card: {
         justifyContent: 'center',
@@ -287,30 +284,31 @@ const styles = StyleSheet.create({
         backgroundColor: '#f7f7f7',
         borderWidth: 1,
         borderTopColor: '#cccccc',
-        paddingTop: 12,
-        paddingBottom: 12,
-        marginBottom: 28
+        paddingTop: 14,
+        paddingBottom: 14,
     },
     price: {
-        flex: .3,
+        flex: .5,
         alignItems: 'center',
     },
     currentPrice: {
         flex: 0.8,
+        flexDirection: 'row',
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: '#f7f7f7',
         paddingTop: 16,
-        paddingBottom: 16
+        paddingBottom: 16,
     },
     flatWrapTop: {
-        backgroundColor: '#3A5A86',
+        backgroundColor: '#313E4F',
         justifyContent: 'center',
         alignItems: 'center',
         shadowOffset: { width: 0, height: 3 },
         shadowOpacity: 0.5,
         shadowRadius: 2,
-        zIndex: 99
+        zIndex: 99,
+        paddingBottom: 12
     },
     flatWrapBottom: {
         backgroundColor: '#ffffff',
@@ -361,8 +359,8 @@ const styles = StyleSheet.create({
         flexDirection: 'column',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginTop: 36,
-        backgroundColor: '#f7f7f7'
+        paddingTop: 36,
+        backgroundColor: '#313E4F'
     },
     donateTitle: {
         margin: 5,
@@ -379,11 +377,6 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         color: '#ffffff',
         marginBottom: 8,
-    },
-    rightButton: {
-        marginRight: 16,
-        fontSize: 26,
-        color: '#555555',
     },
     symbol: {
         marginTop: 30,
