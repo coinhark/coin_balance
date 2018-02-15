@@ -15,6 +15,10 @@ class DBHelper {
                 "price": 0.00,
                 "date": "1318464000",
                 "name": "CoinMarketCap API",
+                "dailyChange": 0.00,
+                "dailyVolume": 0.00,
+                "marketCap": 0.00,
+                "circulatingSupply": 0.00
             }
         }
     }

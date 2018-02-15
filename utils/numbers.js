@@ -9,6 +9,10 @@ class Numbers {
         return new Number(balance).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     }
 
+    static formatPriceWhole(balance, locale) {
+        return new Number(balance).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+
     static formatBalance(balance, locale) {
         return balance.toLocaleString('en', {
             minimumFractionDigits: 0,
