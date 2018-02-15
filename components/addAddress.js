@@ -130,11 +130,11 @@ const styles = {
     rightButton: {
         marginRight: 16,
         fontSize: 26,
-        color: '#555555',
+        color: '#4C7891',
     },
     leftButton: {
         marginLeft: 16,
         fontSize: 26,
-        color: '#555555',
+        color: '#4C7891',
     },
 }

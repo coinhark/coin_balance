@@ -202,7 +202,7 @@ export default class WelcomeScreen extends Component {
                                 <Text style={styles.viewTitleSM}>Edit Addresses</Text>
                             </View>
                             <View style={{flex: 0.05, alignItems: 'flex-end', paddingTop: 12, paddingBottom: 14}}>
-                                <Icon style={{fontSize: 20, color: '#4C7891', paddingTop: 5}} name="ios-arrow-forward"/>
+                                <Icon style={{fontSize: 20, color: '#4C7891', paddingTop: 4}} name="ios-arrow-forward"/>
                             </View>
                         </View>
                     </TouchableOpacity>
@@ -382,7 +382,7 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontWeight: 'bold',
         textAlign: 'center',
-        color: '#4C7891',
+        color: '#f7f7f7',
         marginBottom: 1
     },
     donateAddress: {
@@ -390,7 +390,7 @@ const styles = StyleSheet.create({
         fontSize: 12,
         fontWeight: 'bold',
         textAlign: 'center',
-        color: '#4C7891',
+        color: '#f7f7f7',
         marginBottom: 8,
     },
     symbol: {
