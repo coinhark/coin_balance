@@ -149,10 +149,10 @@ export default class ManageAddress extends Component {
                                             autoClose={true}
                                             backgroundColor={'#0F2B3A'}
                                             right={swipeoutBtns}
-                                            buttonWidth={100}
+                                            buttonWidth={80}
                                         >
                                         <Text key={i + '-text'} numberOfLines={1} ellipsizeMode='tail' style={styles.addressName}>{w.name}</Text>
-                                            <Text style={styles.addressBalance}>{w.totalBalance}
+                                            <Text style={styles.addressBalance}>{Numbers.formatLongBalance(w.totalBalance)}
                                                 <Text style={{fontWeight: '100'}}> {this.coinManager.getCoinTicker()}</Text>
                                             </Text>
                                             <Text style={styles.addressBalance}>${w.valueInDollars}
@@ -168,8 +168,8 @@ export default class ManageAddress extends Component {
                         containerViewStyle={styles.buttonStyle}
                         onPress={() => navigate('AddAddress', {ltcPrice: this.state.ltcPrice})}
                         raised
-                        backgroundColor={'#2196f3'}
-                        title='Add New Address'
+                        backgroundColor={'#0E82AB'}
+                        title='Add Address'
                     />
             </ScrollView>
         );
@@ -211,18 +211,18 @@ const styles = StyleSheet.create({
         marginTop: 8,
         marginBottom: 1,
         fontWeight: 'bold',
-        color: '#f7f7f7'
+        color: '#ffffff'
     },
     addressBalance: {
         fontSize: 13,
         fontWeight: '500',
         marginBottom: 1,
-        color: '#f7f7f7'
+        color: '#ffffff'
     },
     addressText: {
         fontSize: 12,
         marginBottom: 8,
-        color: '#4C7891'
+        color: '#ffffff'
     },
     addressIcon: {
         fontSize: 50,
@@ -238,7 +238,7 @@ const styles = StyleSheet.create({
         color: '#f7f7f7'
     },
     buttonStyle: {
-        marginTop: 30,
+        marginTop: 20,
     },
     refreshButton: {
         fontSize: 24,

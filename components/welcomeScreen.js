@@ -120,11 +120,10 @@ export default class WelcomeScreen extends Component {
                      "date": new Date().getTime().toString()
                  }
                  if (exchange.dailyChange.includes('-')) {
-                     this.dailyChangeColor = '#e74c3c';
-                     this.changeIcon = <Icon style={{fontSize: 20, color: '#e74c3c'}} name="md-arrow-dropdown"/>;
+                     this.dailyChangeColor = '#B35B63';
                  } else {
-                     this.dailyChangeColor = '#27ae60';
-                     this.changeIcon = <Icon style={{fontSize: 18, color: '#27ae60', marginLeft: 16}} name="md-arrow-dropup"/>;
+                     this.dailyChangeColor = '#7BC087';
+                     this.changeIcon = <Text style={{fontSize: 18, color: '#7BC087'}}>+</Text>;
                  }
                  let value = Numbers.formatPrice(this.state.totalBalance * exchange.price, 'US');
                  let price = exchange.price;
@@ -224,7 +223,7 @@ export default class WelcomeScreen extends Component {
                             </View>
                             <View style={ this.state.loaded ? {flex: 0.45, alignItems: 'flex-end', paddingTop: 9} : { display: 'none' }}>
                                     <Text style={styles.coinType}>${this.globals.roundTwoDecimals(this.state.currentPrice)}</Text>
-                                <Text style={{color: '#ffffff', fontWeight: 'bold', fontSize: 14, color:this.dailyChangeColor}}>{this.changeIcon} {this.state.dailyChange}%</Text>
+                                <Text style={{color: '#ffffff', fontWeight: 'bold', fontSize: 14, color:this.dailyChangeColor}}>{this.changeIcon}{this.state.dailyChange}%</Text>
                             </View>
                         </View>
                     </View>
