@@ -41,7 +41,7 @@ export default class ManageAddress extends Component {
     }
 
     static navigationOptions = ({ navigate, navigation }) => ({
-        title: GlobalConstants.getAppName(),
+        title: 'Manage Addresses',
         gesturesEnabled: false,
         headerLeft: <Icon name="home" style={styles.leftButton} onPress={() =>{ navigation.navigate('Home'); }} />,
         headerRight: <Icon name="add" style={styles.rightButton} onPress={() =>{ navigation.navigate('AddAddress')}}/>,
@@ -121,11 +121,6 @@ export default class ManageAddress extends Component {
                         paddingTop: 10,
                         paddingBottom: 10
                     }}>
-                    <View style={{ flex: 0.25, marginLeft: 2 }} >
-                        <Text style={styles.cardTitle}>Addresses</Text>
-                    </View>
-                    <View style={{ flex: 0.50 }} ></View>
-                    <View style={{ flex: 0.25, marginRight: 2 }} />
                     </View>
                     {renderIf(this.state.db.balanceInfo.addresses.length == 0, <View>
                         <Icon name="add-alert" style={styles.addressIcon} fadeDuration={100} />
@@ -152,7 +147,7 @@ export default class ManageAddress extends Component {
                                     <View key={i} style={styles.card}>
                                         <Swipeout
                                             autoClose={true}
-                                            backgroundColor={'#0C212D'}
+                                            backgroundColor={'#0F2B3A'}
                                             right={swipeoutBtns}
                                             buttonWidth={100}
                                         >
@@ -194,16 +189,20 @@ const styles = StyleSheet.create({
         marginLeft: 14
     },
     card: {
-        backgroundColor: '#0C212D',
-        paddingLeft: 16,
-        borderTopWidth: 1,
-        borderTopColor: '#0c0c0c',
+        backgroundColor: '#0F2B3A',
+        borderRadius:4,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
+        paddingLeft: 18,
+        marginLeft: 12,
+        marginRight: 12,
+        marginBottom: 6
     },
     cardTitle: {
         color: '#4C7891',
         fontWeight: '700',
-        fontSize: 12,
-        marginBottom: 15,
+        fontSize: 14,
         marginTop: 15,
         textAlign: 'center'
     },
