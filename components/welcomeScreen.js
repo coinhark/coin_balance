@@ -348,7 +348,7 @@ const styles = StyleSheet.create({
         color: '#ffffff',
     },
     viewTitleSM: {
-        paddingTop: 2,
+        paddingTop: 3,
         fontSize: 14,
         textAlign: 'left',
         color: '#ffffff',
