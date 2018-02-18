@@ -56,6 +56,7 @@ export default class WelcomeScreen extends Component {
                  console.log("Creating new db of: " + JSON.stringify(this.state.db));
                  this.setState({db: this.dbhelper.bareDb})
                  console.log("db state is now bare: " + JSON.stringify(this.state.db));
+                 this.getMarketData();
                  this.setState({loaded: true, refreshing: false});
              } else {
                  this.setState({db: JSON.parse(value)});
@@ -166,12 +167,18 @@ export default class WelcomeScreen extends Component {
     render() {
         const {navigate} = this.props.navigation;
 
-        let visibletext = null;
-            visibletext = (
-                <ScrollView style={styles.darkBackground}>
+        return (
+                <ScrollView style={styles.darkBackground} horizontal={false}
+                            refreshControl={
+                                <RefreshControl
+                                    enabled={true}
+                                    refreshing={this.state.refreshing}
+                                    onRefresh={() => this.initView()}
+                                />
+                            }>
                     <View style={{flex: 1, flexDirection: 'row', justifyContent: 'center'}}>
                         <View style={{flex: .9, paddingTop: 40, paddingBottom: 1}}>
-                            <Text style={{color: '#4C7891', fontWeight: '700', fontSize: 12}}>ADDRESS BALANCES</Text>
+                            <Text style={styles.attrTitle}>ADDRESS BALANCES</Text>
                         </View>
                     </View>
                     <View style={styles.flatWrapTop}>
@@ -189,9 +196,12 @@ export default class WelcomeScreen extends Component {
                         </View>
                     </View>
                     </View>
+                    <View style={ this.state.apiError ? { flex: 1, flexDirection: row } : { display: 'none'} }>
+                        <Text style={{color: 'red'}}>An unexpected error has occurred, please try again.</Text>
+                    </View>
                     <View style={{flex: 1, flexDirection: 'row', justifyContent: 'center'}}>
                         <View style={{flex: .9, paddingBottom: 1}}>
-                            <Text style={{color: '#4C7891', fontWeight: '700', fontSize: 12}}>MANAGE ADDRESSES</Text>
+                            <Text style={styles.attrTitle}>MANAGE ADDRESSES</Text>
                         </View>
                     </View>
                     <TouchableOpacity onPress={() => navigate('ManageAddresses')} style={styles.flatWrapTop}>
@@ -209,7 +219,7 @@ export default class WelcomeScreen extends Component {
                     </TouchableOpacity>
                     <View style={{flex: 1, flexDirection: 'row', justifyContent: 'center'}}>
                         <View style={{flex: .9, paddingBottom: 1}}>
-                            <Text style={{color: '#4C7891', fontWeight: '700', fontSize: 12}}>MARKET PRICES (USD)</Text>
+                            <Text style={styles.attrTitle}>MARKET PRICES (USD)</Text>
                         </View>
                     </View>
                     <View style={styles.flatWrapTop}>
@@ -230,58 +240,28 @@ export default class WelcomeScreen extends Component {
                     <View style={styles.flatWrapTop}>
                         <View style={styles.pricing}>
                             <View style={{flex: 0.45, alignItems: 'flex-end'}}>
-                                <Text style={{paddingBottom: 3, color: '#4C7891', fontWeight: '700', paddingRight: 4, fontSize: 12}}>MARKET CAP</Text>
-                                <Text style={{paddingBottom: 3, color: '#4C7891', fontWeight: '700', paddingRight: 4, fontSize: 12}}>24H VOLUME</Text>
-                                <Text style={{paddingBottom: 3, color: '#4C7891', fontWeight: '700', paddingRight: 4, fontSize: 12}}>CIRCULATING SUPPLY</Text>
+                                <Text style={styles.marketTitle}>MARKET CAP</Text>
+                                <Text style={styles.marketTitle}>24H VOLUME</Text>
+                                <Text style={styles.marketTitle}>CIRCULATING SUPPLY</Text>
                             </View>
                             <View style={ !this.state.loaded ? {flex: 0.45, alignItems: 'center', paddingTop: 14} : { display : 'none' }}>
                                 <ActivityIndicator style={styles.viewTitleSpinner} size="small" color="#2196f3" />
                             </View>
                             <View style={ this.state.loaded ? {flex: 0.45, alignItems: 'flex-start'} : { display: 'none' }}>
-                                <Text style={{paddingBottom: 3, color: '#ffffff', paddingLeft: 4, fontSize: 12}}>${Numbers.formatPriceWhole(this.state.marketCap)}</Text>
-                                <Text style={{paddingBottom: 3, color: '#ffffff', paddingLeft: 4, fontSize: 12}}>${Numbers.formatPriceWhole(this.state.dailyVolume)}</Text>
-                                <Text style={{paddingBottom: 3, color: '#ffffff', paddingLeft: 4, fontSize: 12}}>{Numbers.formatPriceWhole(this.state.circulatingSupply)} {this.coinManager.getCoinTicker()}</Text>
+                                <Text style={styles.marketData}>${Numbers.formatPriceWhole(this.state.marketCap)}</Text>
+                                <Text style={styles.marketData}>${Numbers.formatPriceWhole(this.state.dailyVolume)}</Text>
+                                <Text style={styles.marketData}>{Numbers.formatPriceWhole(this.state.circulatingSupply)} {this.coinManager.getCoinTicker()}</Text>
                             </View>
                         </View>
                     </View>
+                    <View style={styles.donateContainer}>
+                        <Text style={styles.donateTitle}>Donate to our {this.coinManager.getCoinName()} development</Text>
+                        <Text selectable={true} style={styles.donateAddress}>{this.coinManager.getCoinDonationAddress()}</Text>
+                    </View>
                 </ScrollView>
             );
-
-        if(this.state.apiError != null) {
-            visibletext = (
-                <Card wrapperStyle={styles.card} title="Welcome">
-                    <Image style={styles.symbol} source={this.coinManager.getAssets().symbol}/>
-                    <Text style={styles.viewTitleL}>Total Balance</Text>
-                    <Text style={styles.error} size="small">{this.state.apiError}</Text>
-                    <Text style={styles.refresh} size="small" onPress={() => this.initView()}>Refresh Now</Text>
-                    <Button
-                        raised
-                        onPress={() => navigate('ManageAddresses')}
-                        backgroundColor={'#2196f3'}
-                        title='Manage Addresses'
-                    />
-                </Card>
-            );
         }
-
-        return (
-            <ScrollView style={styles.darkBackground} horizontal={false}
-                        refreshControl={
-                            <RefreshControl
-                                enabled={true}
-                                refreshing={this.state.refreshing}
-                                onRefresh={() => this.initView()}
-                            />
-                        }>
-                { visibletext }
-                <View style={styles.donateContainer}>
-                    <Text style={styles.donateTitle}>Donate to our {this.coinManager.getCoinName()} development</Text>
-                    <Text selectable={true} style={styles.donateAddress}>{this.coinManager.getCoinDonationAddress()}</Text>
-                </View>
-            </ScrollView>
-        );
     }
-}
 
 const styles = StyleSheet.create({
     darkBackground: {
@@ -365,7 +345,7 @@ const styles = StyleSheet.create({
         flexDirection: 'column',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingTop: 36,
+        paddingTop: 14,
         backgroundColor: '#0C212D'
     },
     donateTitle: {
@@ -388,7 +368,23 @@ const styles = StyleSheet.create({
         width: 40,
         height: 40,
         alignItems: 'flex-start',
+    },
+    marketData: {
+        paddingLeft: 4,
+        paddingBottom: 3,
+        color: '#ffffff',
+        fontSize: 12
+    },
+    marketTitle: {
+        paddingRight: 4,
+        paddingBottom: 3,
+        color: '#4C7891',
+        fontWeight: '700',
+        fontSize: 12
+    },
+    attrTitle: {
+        color: '#4C7891',
+        fontWeight: '700',
+        fontSize: 12
     }
-    /*<Text style={styles.viewTitleSM}>Total Balance: {Numbers.formatBalance(this.state.totalBalance, 'US')} {this.coinManager.getCoinTicker()}</Text>
-                            <Text style={styles.viewTitleSM}>${this.state.valueInDollars} USD</Text>*/
 });
