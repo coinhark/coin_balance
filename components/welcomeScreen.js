@@ -202,17 +202,15 @@ export default class WelcomeScreen extends Component {
                 </View>
                 <View style={{width: '90%', height: 110, justifyContent: 'center'}} >
                     <Text style={styles.attrTitle}>MANAGE ADDRESSES</Text>
-                    <TouchableOpacity onPress={() => navigate('ManageAddresses')}>
-                        <View style={styles.card}>
-                            <View style={{flex: 0.45, flexDirection: 'row', alignItems: 'flex-start', paddingTop: 14, paddingBottom: 14}}>
-                                <Text style={styles.viewTitleSM}>Tracking {this.state.db.balanceInfo.addresses.length} addresses</Text>
-                            </View>
-                            <View style={{flex: 0.4, alignItems: 'flex-end', paddingTop: 15, paddingBottom: 14}}>
-                                <Text style={styles.viewTitleSM}>Edit Addresses</Text>
-                            </View>
-                            <View style={{flex: 0.05, alignItems: 'flex-end', paddingTop: 12, paddingBottom: 14}}>
-                                <Icon style={{fontSize: 20, color: '#4C7891', paddingTop: 4}} name="ios-arrow-forward"/>
-                            </View>
+                    <TouchableOpacity style={styles.card} onPress={() => navigate('ManageAddresses')}>
+                        <View style={{flex: 0.45, flexDirection: 'row', alignItems: 'flex-start', paddingTop: 14, paddingBottom: 14}}>
+                            <Text style={styles.viewTitleSM}>Tracking {this.state.db.balanceInfo.addresses.length} addresses</Text>
+                        </View>
+                        <View style={{flex: 0.4, alignItems: 'flex-end', paddingTop: 15, paddingBottom: 14}}>
+                            <Text style={styles.viewTitleSM}>Edit Addresses</Text>
+                        </View>
+                        <View style={{flex: 0.05, alignItems: 'flex-end', paddingTop: 12, paddingBottom: 14}}>
+                            <Icon style={{fontSize: 20, color: '#4C7891', paddingTop: 4}} name="ios-arrow-forward"/>
                         </View>
                     </TouchableOpacity>
                 </View>
@@ -256,97 +254,6 @@ export default class WelcomeScreen extends Component {
                     </View>
                 </View>
             </ScrollView>
-                /*<ScrollView style={styles.darkBackground} horizontal={false}
-                            refreshControl={
-                                <RefreshControl
-                                    enabled={true}
-                                    refreshing={this.state.refreshing}
-                                    onRefresh={() => this.initView()}
-                                />
-                            }>
-                    <View style={{flex: 1, flexDirection: 'row', justifyContent: 'center'}}>
-                        <View style={{flex: .9, paddingTop: 40, paddingBottom: 1}}>
-                            <Text style={styles.attrTitle}>ADDRESS BALANCES</Text>
-                        </View>
-                    </View>
-                    <View style={styles.flatWrapTop}>
-                        <View style={styles.card}>
-                        <View style={{flex: 0.35, flexDirection: 'row', paddingTop: 6, paddingBottom: 6}}>
-                            <Image style={styles.symbol} source={this.coinManager.getAssets().symbol}/>
-                            <Text style={styles.coinLabelBalance}>{this.coinManager.getCoinName()}</Text>
-                        </View>
-                            <View style={ !this.state.loaded ? {flex: 0.55, alignItems: 'flex-end', paddingTop: 16} : { display : 'none' }}>
-                                <ActivityIndicator style={styles.viewTitleSpinner} size="small" color="#2196f3" />
-                            </View>
-                            <View style={ this.state.loaded ? {flex: 0.55, alignItems: 'flex-end', paddingTop: 8} : {display : 'none' }}>
-                            <Text style={styles.coinType}>{Numbers.formatBalance(this.state.totalBalance, 'US')} {this.coinManager.getCoinTicker()}</Text>
-                            <Text style={styles.viewTitleSM}>${this.state.valueInDollars} USD</Text>
-                        </View>
-                    </View>
-                    </View>
-                    <View style={ this.state.apiError ? { flex: 1, flexDirection: row } : { display: 'none'} }>
-                        <Text style={{color: 'red'}}>An unexpected error has occurred, please try again.</Text>
-                    </View>
-                    <View style={{flex: 1, flexDirection: 'row', justifyContent: 'center'}}>
-                        <View style={{flex: .9, paddingBottom: 1}}>
-                            <Text style={styles.attrTitle}>MANAGE ADDRESSES</Text>
-                        </View>
-                    </View>
-                    <TouchableOpacity onPress={() => navigate('ManageAddresses')} style={styles.flatWrapTop}>
-                        <View style={styles.card}>
-                            <View style={{flex: 0.45, flexDirection: 'row', alignItems: 'flex-start', paddingTop: 14, paddingBottom: 14}}>
-                                <Text style={styles.viewTitleSM}>Tracking {this.state.db.balanceInfo.addresses.length} addresses</Text>
-                            </View>
-                            <View style={{flex: 0.4, alignItems: 'flex-end', paddingTop: 15, paddingBottom: 14}}>
-                                <Text style={styles.viewTitleSM}>Edit Addresses</Text>
-                            </View>
-                            <View style={{flex: 0.05, alignItems: 'flex-end', paddingTop: 12, paddingBottom: 14}}>
-                                <Icon style={{fontSize: 20, color: '#4C7891', paddingTop: 4}} name="ios-arrow-forward"/>
-                            </View>
-                        </View>
-                    </TouchableOpacity>
-                    <View style={{flex: 1, flexDirection: 'row', justifyContent: 'center'}}>
-                        <View style={{flex: .9, paddingBottom: 1}}>
-                            <Text style={styles.attrTitle}>MARKET PRICES (USD)</Text>
-                        </View>
-                    </View>
-                    <View style={styles.flatWrapTop}>
-                        <View style={styles.card}>
-                            <View style={{flex: 0.45, flexDirection: 'column', paddingTop: 8, paddingBottom: 8}}>
-                                <Text style={styles.coinType}>{this.coinManager.getCoinName()}</Text>
-                                <Text style={styles.viewTitleSM}>{this.coinManager.getCoinTicker()}</Text>
-                            </View>
-                            <View style={ !this.state.loaded ? {flex: 0.45, alignItems: 'flex-end', paddingTop: 16} : { display : 'none' }}>
-                                <ActivityIndicator style={styles.viewTitleSpinner} size="small" color="#2196f3" />
-                            </View>
-                            <View style={ this.state.loaded ? {flex: 0.45, alignItems: 'flex-end', paddingTop: 9} : { display: 'none' }}>
-                                    <Text style={styles.coinType}>${this.globals.roundTwoDecimals(this.state.currentPrice)}</Text>
-                                <Text style={{color: '#ffffff', fontWeight: 'bold', fontSize: 14, color:this.dailyChangeColor}}>{this.changeIcon}{this.state.dailyChange}%</Text>
-                            </View>
-                        </View>
-                    </View>
-                    <View style={styles.flatWrapTop}>
-                        <View style={styles.pricing}>
-                            <View style={{flex: 0.45, alignItems: 'flex-end'}}>
-                                <Text style={styles.marketTitle}>MARKET CAP</Text>
-                                <Text style={styles.marketTitle}>24H VOLUME</Text>
-                                <Text style={styles.marketTitle}>CIRCULATING SUPPLY</Text>
-                            </View>
-                            <View style={ !this.state.loaded ? {flex: 0.45, alignItems: 'center', paddingTop: 14} : { display : 'none' }}>
-                                <ActivityIndicator style={styles.viewTitleSpinner} size="small" color="#2196f3" />
-                            </View>
-                            <View style={ this.state.loaded ? {flex: 0.45, alignItems: 'flex-start'} : { display: 'none' }}>
-                                <Text style={styles.marketData}>${Numbers.formatPriceWhole(this.state.marketCap)}</Text>
-                                <Text style={styles.marketData}>${Numbers.formatPriceWhole(this.state.dailyVolume)}</Text>
-                                <Text style={styles.marketData}>{Numbers.formatPriceWhole(this.state.circulatingSupply)} {this.coinManager.getCoinTicker()}</Text>
-                            </View>
-                        </View>
-                    </View>
-                    <View style={styles.donateContainer}>
-                        <Text style={styles.donateTitle}>Donate to our {this.coinManager.getCoinName()} development</Text>
-                        <Text selectable={true} style={styles.donateAddress}>{this.coinManager.getCoinDonationAddress()}</Text>
-                    </View>
-                </ScrollView>*/
             );
         }
     }
@@ -376,18 +283,10 @@ const styles = StyleSheet.create({
         fontSize: 18,
         paddingTop: 8
     },
-    flatWrapBottom: {
-        backgroundColor: '#ffffff',
-        justifyContent: 'center',
-        alignItems: 'center'
-    },
     error: {
         marginTop: 28,
         marginBottom: 28,
         color: '#DC143C'
-    },
-    viewTitleSpinner: {
-
     },
     subTitle: {
         textAlign: 'left',
