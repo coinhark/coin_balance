@@ -168,10 +168,11 @@ export default class WelcomeScreen extends Component {
         const {navigate} = this.props.navigation;
 
         return (
-            <ScrollView contentContainerStyle={{
+            <ScrollView
+            style={{backgroundColor: '#0C212D'}}
+            contentContainerStyle={{
                 flex: 1,
                 flexDirection: 'column',
-                backgroundColor: '#0C212D',
                 justifyContent: 'space-between',
                 paddingTop: 30,
                 paddingBottom: 30,
@@ -182,6 +183,10 @@ export default class WelcomeScreen extends Component {
                                 enabled={true}
                                 refreshing={this.state.refreshing}
                                 onRefresh={() => this.initView()}
+                                progressBackgroundColor={'#000000'}
+                                tintColor={'#ffffff'}
+                                title={'HODL'}
+                                titleColor={'#ffffff'}
                             />
                         }>
                 <View style={{width: '90%', height: 110, justifyContent: 'center'}} >
