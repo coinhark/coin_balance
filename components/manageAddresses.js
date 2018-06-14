@@ -41,7 +41,7 @@ export default class ManageAddress extends Component {
     }
 
     static navigationOptions = ({ navigate, navigation }) => ({
-        title: 'Manage Addresses',
+        title: 'Manage Accounts',
         gesturesEnabled: false,
         headerLeft: <Icon name="home" style={styles.leftButton} onPress={() =>{ navigation.navigate('Home'); }} />,
         headerRight: <Icon name="add" style={styles.rightButton} onPress={() =>{ navigation.navigate('AddAddress')}}/>,
@@ -124,7 +124,7 @@ export default class ManageAddress extends Component {
                     </View>
                     {renderIf(this.state.db.balanceInfo.addresses.length == 0, <View>
                         <Icon name="add-alert" style={styles.addressIcon} fadeDuration={100} />
-                        <Text style={styles.noAddress}>It looks like you don't have any addresses yet.</Text>
+                        <Text style={styles.noAddress}>It looks like you don't have any accounts yet.</Text>
                         <Text style={styles.noAddress}>You can add one below.</Text>
                     </View>)}
                     {
@@ -169,7 +169,7 @@ export default class ManageAddress extends Component {
                         onPress={() => navigate('AddAddress', {ltcPrice: this.state.ltcPrice})}
                         raised
                         backgroundColor={'#0E82AB'}
-                        title='Add Address'
+                        title='Add Account'
                     />
             </ScrollView>
         );

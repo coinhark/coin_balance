@@ -208,13 +208,13 @@ export default class WelcomeScreen extends Component {
                     </View>
                 </View>
                 <View style={{width: '90%', height: 110, justifyContent: 'center'}} >
-                    <Text style={this.styles.attrTitle}>MANAGE ADDRESSES</Text>
+                    <Text style={this.styles.attrTitle}>MANAGE ACCOUNTS</Text>
                     <TouchableOpacity style={this.styles.card} onPress={() => navigate('ManageAddresses')}>
                         <View style={{flex: 0.45, flexDirection: 'row', alignItems: 'flex-start', paddingTop: 14, paddingBottom: 14}}>
-                            <Text style={this.styles.viewTitleSM}>Tracking {this.state.db.balanceInfo.addresses.length} addresses</Text>
+                            <Text style={this.styles.viewTitleSM}>Tracking {this.state.db.balanceInfo.addresses.length} accounts</Text>
                         </View>
                         <View style={{flex: 0.4, alignItems: 'flex-end', paddingTop: 15, paddingBottom: 14}}>
-                            <Text style={this.styles.viewTitleSM}>Edit Addresses</Text>
+                            <Text style={this.styles.viewTitleSM}>Edit Accounts</Text>
                         </View>
                         <View style={{flex: 0.05, alignItems: 'flex-end', paddingTop: 12, paddingBottom: 14}}>
                             <Icon style={{fontSize: 20, color: '#4C7891', paddingTop: 4}} name="ios-arrow-forward"/>

@@ -51,14 +51,16 @@ export default class AddAddress extends Component {
     }
 
     static navigationOptions = ({navigate, navigation}) => ({
-        title: 'Add Address',
+        title: 'Add Account',
         gesturesEnabled: false,
         headerLeft: <Icon name="keyboard-backspace" style={styles.leftButton} onPress={() => {
             navigation.navigate('ManageAddresses');
         }}/>,
+        /*
         headerRight: <Icon name="qrcode" style={styles.rightButton} onPress={() => {
             navigation.navigate('Scanner');
         }}/>,
+        */
         headerStyle: { backgroundColor: '#0C1C26' },
         headerTitleStyle: { color: '#f7f7f7' }
     })
@@ -86,7 +88,7 @@ export default class AddAddress extends Component {
         const { navigate } = this.props.navigation;
         return (
             <ScrollView style={styles.darkBackground}>
-                <FormLabel labelStyle={{color: '#4C7891'}}>Address</FormLabel>
+                <FormLabel labelStyle={{color: '#4C7891'}}>Account</FormLabel>
                 <FormInput
                     autoCorrect={false}
                     inputStyle={{ fontSize: 14, color: '#f7f7f7' }}
@@ -100,9 +102,9 @@ export default class AddAddress extends Component {
                     {'Invalid ' + this.coinManager.getCoinName() + ' Address'}
                 </FormValidationMessage>)}
                 {renderIf(this.state.addressExists && this.state.address !== '', <FormValidationMessage labelStyle={{color: '#e74c3c'}}>
-                    {'This address already exists'}
+                    {'This account already exists'}
                 </FormValidationMessage>)}
-                <FormLabel labelStyle={{color: '#4C7891'}}>Name</FormLabel>
+                <FormLabel labelStyle={{color: '#4C7891'}}>Label</FormLabel>
                 <FormInput
                     autoCorrect={false}
                     inputStyle={{ fontSize: 14, color: '#f7f7f7' }}
@@ -119,7 +121,7 @@ export default class AddAddress extends Component {
                     onPress={this._submitAddress}
                     raised
                     backgroundColor={'#0E82AB'}
-                    title='Submit Address'
+                    title='Submit Account'
                 />
             </ScrollView>
         );
