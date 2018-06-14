@@ -108,6 +108,21 @@ class CoinValidation {
       }
     }
 
+    processAndValidateEOS(addressObj, coin, component) {
+      let validationAddress = component.state.address;
+      console.log(`Validating ${coin} address ${validationAddress}`);
+      if(true) {
+          let tmpDb = component.state.db;
+          tmpDb.balanceInfo.addresses.push(addressObj);
+          component.setState({db: tmpDb});
+          component.props.navigation.navigate('ManageAddresses');
+          return true;
+      } else {
+          component.setState({invalidAddress: true});
+          return false;
+      }
+    }
+
     processAndValidateAddress(addressObj, coin, component) {
       if(coin.toLowerCase() == 'ltc'.toLowerCase()) {
         return this.processAndValidateBitcoinBasedCoin(addressObj, coin, component);
