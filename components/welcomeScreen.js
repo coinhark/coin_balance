@@ -1,10 +1,12 @@
 import React, {Component} from 'react';
-import {ScrollView, RefreshControl, Clipboard, Text, View, StyleSheet, Alert, Image, AsyncStorage, ActivityIndicator, Keyboard} from 'react-native';
+import {ScrollView, RefreshControl, TouchableOpacity, Clipboard, Text, View, StyleSheet, Alert, Image, AsyncStorage, ActivityIndicator, Keyboard} from 'react-native';
 import {FormLabel, FormInput, Button, Card} from 'react-native-elements';
 import GlobalConstants from '../globals';
 import CoinManager from '../coinmanager';
 import DBHelper from '../dbhelper';
 import Numbers from '../utils/numbers';
+import Icon from 'react-native-vector-icons/Ionicons';
+import CoinStyles from '../styles/styles';
 
 export default class WelcomeScreen extends Component {
     constructor(props) {
@@ -13,6 +15,10 @@ export default class WelcomeScreen extends Component {
             totalBalance: 0.00000000,
             valueInDollars: 0.00,
             currentPrice: 0.00,
+            marketCap: 0.00,
+            dailyChange: 0.00,
+            dailyVolume: 0.00,
+            circulatingSupply: 0.00,
             loaded: false,
             refreshing: false,
             apiError: null,
@@ -30,8 +36,10 @@ export default class WelcomeScreen extends Component {
                 }
             }
         }
+        this.globals = GlobalConstants;
         this.coinManager = new CoinManager();
         this.dbhelper = new DBHelper();
+        this.styles = new CoinStyles().getStyle(this.coinManager.coin)
     }
 
     componentDidMount() {
@@ -50,6 +58,7 @@ export default class WelcomeScreen extends Component {
                  console.log("Creating new db of: " + JSON.stringify(this.state.db));
                  this.setState({db: this.dbhelper.bareDb})
                  console.log("db state is now bare: " + JSON.stringify(this.state.db));
+                 this.getMarketData();
                  this.setState({loaded: true, refreshing: false});
              } else {
                  this.setState({db: JSON.parse(value)});
@@ -109,8 +118,15 @@ export default class WelcomeScreen extends Component {
                      "dailyVolume": responseJson[0]['24h_volume_usd'],
                      "marketCap": responseJson[0].market_cap_usd,
                      "price": responseJson[0].price_usd,
+                     "circulatingSupply": responseJson[0].available_supply,
                      "name": this.coinManager.getMarketApi().name,
                      "date": new Date().getTime().toString()
+                 }
+                 if (exchange.dailyChange.includes('-')) {
+                     this.dailyChangeColor = '#B35B63';
+                 } else {
+                     this.dailyChangeColor = '#7BC087';
+                     this.changeIcon = <Text style={{fontSize: 18, color: '#7BC087'}}>+</Text>;
                  }
                  let value = Numbers.formatPrice(this.state.totalBalance * exchange.price, 'US');
                  let price = exchange.price;
@@ -122,6 +138,7 @@ export default class WelcomeScreen extends Component {
                      dailyChange: exchange.dailyChange,
                      dailyVolume: exchange.dailyVolume,
                      marketCap: exchange.marketCap,
+                     circulatingSupply: exchange.circulatingSupply,
                      currentPrice: price,
                      loaded: true,
                      refreshing: false,
@@ -145,236 +162,105 @@ export default class WelcomeScreen extends Component {
         title: GlobalConstants.getAppName(),
         headerLeft: null,
         gesturesEnabled: false,
-        headerStyle: { backgroundColor: '#375374' },
+        headerStyle: { backgroundColor: '#0C1C26' },
         headerTitleStyle: { color: '#ffffff' }
     })
 
     render() {
         const {navigate} = this.props.navigation;
 
-        let visibletext = null;
-        if(this.state.loaded) {
-            visibletext = (
-                <ScrollView style={styles.darkBackground}>
-                    <View style={styles.flatWrapTop}>
-                        <Image style={styles.symbol} source={this.coinManager.getAssets().symbol}/>
-                        <Text style={styles.subTitle}>TOTAL BALANCE:</Text>
-                        <Text style={styles.coinType}>{Numbers.formatBalance(this.state.totalBalance, 'US')} {this.coinManager.getCoinTicker()}</Text>
-                        <Text style={styles.viewTitleL}>${this.state.currentPrice} USD</Text>
-                    </View>
-                    <View style={styles.priceInfo}>
-                        <View style={styles.price}>
-                            <Text style={{color: '#ffffff', fontSize: 12}}>24H Change</Text>
-                            <Text style={{color: '#ffffff', fontWeight: 'bold'}}>{this.state.dailyChange}</Text>
-                        </View>
-                        <View style={styles.price}>
-                            <Text style={{color: '#ffffff'}}>24H Volume</Text>
-                            <Text style={{color: '#ffffff', fontWeight: 'bold'}}>{this.state.dailyVolume}</Text>
-                        </View>
-                        <View style={styles.price}>
-                            <Text style={{color: '#ffffff'}}>Market Cap</Text>
-                            <Text style={{color: '#ffffff', fontWeight: 'bold'}}>{this.state.marketCap}</Text>
-                        </View>
-                    </View>
-                    <View style={styles.currentPrice}>
-                        <Text style={{color: '#ffffff'}}>Current Price: {this.state.currentPrice}</Text>
-                    </View>
-                    <View>
-                        <Button
-                            raised
-                            onPress={() => navigate('ManageAddresses')}
-                            backgroundColor={'#2196f3'}
-                            title='Manage Addresses'
-                        />
-                    </View>
-                </ScrollView>
-                /*<ScrollView>
-                    <View style={styles.flatWrapTop}>
-                        <View style={{flex: 1, flexDirection: 'row'}}>
-                            <Image style={styles.symbol} source={this.coinManager.getAssets().symbol}/>
-                            <Text style={styles.viewTitleL}>Current Price: {this.state.currentPrice}</Text>
-                        </View>
-                        <Text style={styles.viewTitleL}>Total Balance: {Numbers.formatBalance(this.state.totalBalance, 'US')} {this.coinManager.getCoinTicker()}</Text>
-                        <Text wrapperStyle={styles.card} style={styles.viewTitleSM}>${this.state.valueInDollars} USD</Text>
-                    </View>
-                    <View style={styles.flatWrapBottom}>
-                        <Button
-                            raised
-                            onPress={() => navigate('ManageAddresses')}
-                            backgroundColor={'#2196f3'}
-                            title='Manage Addresses'
-                        />
-                    </View>
-                </ScrollView>*/
-            );
-        } else {
-            visibletext = (
-                <Card wrapperStyle={styles.card} title="Welcome">
-                    <Image style={styles.symbol} source={this.coinManager.getAssets().symbol}/>
-                    <Text style={styles.viewTitleL}>Total Balance</Text>
-                    <ActivityIndicator style={styles.viewTitleSpinner} size="small" color="#2196f3" />
-                    <Button
-                        raised
-                        onPress={() => navigate('ManageAddresses')}
-                        backgroundColor={'#2196f3'}
-                        title='Manage Addresses'
-                    />
-                </Card>
-            );
-        }
-
-        if(this.state.apiError != null) {
-            visibletext = (
-                <Card wrapperStyle={styles.card} title="Welcome">
-                    <Image style={styles.symbol} source={this.coinManager.getAssets().symbol}/>
-                    <Text style={styles.viewTitleL}>Total Balance</Text>
-                    <Text style={styles.error} size="small">{this.state.apiError}</Text>
-                    <Text style={styles.refresh} size="small" onPress={() => this.initView()}>Refresh Now</Text>
-                    <Button
-                        raised
-                        onPress={() => navigate('ManageAddresses')}
-                        backgroundColor={'#2196f3'}
-                        title='Manage Addresses'
-                    />
-                </Card>
-            );
-        }
-
         return (
-            <ScrollView style={styles.darkBackground} horizontal={false}
+            <ScrollView
+            style={{backgroundColor: '#0C212D'}}
+            contentContainerStyle={{
+                flex: 1,
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                paddingTop: 30,
+                paddingBottom: 30,
+                alignItems: 'center'
+            }} horizontal={false}
                         refreshControl={
                             <RefreshControl
                                 enabled={true}
                                 refreshing={this.state.refreshing}
                                 onRefresh={() => this.initView()}
+                                progressBackgroundColor={'#000000'}
+                                tintColor={'#ffffff'}
+                                title={'HODL'}
+                                titleColor={'#ffffff'}
                             />
                         }>
-                { visibletext }
-                <View style={styles.donateContainer}>
-                    <Text style={styles.donateTitle}>Donate to our {this.coinManager.getCoinName()} development</Text>
-                    <Text selectable={true} style={styles.donateAddress}>{this.coinManager.getCoinDonationAddress()}</Text>
+                <View style={{width: '90%', height: 110, justifyContent: 'center'}} >
+                    <Text style={this.styles.attrTitle}>ADDRESS BALANCES</Text>
+                    <View style={this.styles.card}>
+                        <View style={{flex: 0.35, flexDirection: 'row', paddingTop: 6, paddingBottom: 6}}>
+                            <Image style={this.styles.symbol} source={this.coinManager.getAssets().symbol}/>
+                            <Text style={this.styles.coinLabelBalance}>{this.coinManager.getCoinName()}</Text>
+                        </View>
+                        <View style={ !this.state.loaded ? {flex: 0.55, alignItems: 'flex-end', paddingTop: 16} : { display : 'none' }}>
+                            <ActivityIndicator style={this.styles.viewTitleSpinner} size="small" color="#2196f3" />
+                        </View>
+                        <View style={ this.state.loaded ? {flex: 0.55, alignItems: 'flex-end', paddingTop: 8} : {display : 'none' }}>
+                            <Text style={this.styles.coinType}>{Numbers.formatBalance(this.state.totalBalance, 'US')} {this.coinManager.getCoinTicker()}</Text>
+                            <Text style={this.styles.viewTitleSM}>${this.state.valueInDollars} USD</Text>
+                        </View>
+                    </View>
+                </View>
+                <View style={{width: '90%', height: 110, justifyContent: 'center'}} >
+                    <Text style={this.styles.attrTitle}>MANAGE ACCOUNTS</Text>
+                    <TouchableOpacity style={this.styles.card} onPress={() => navigate('ManageAddresses')}>
+                        <View style={{flex: 0.45, flexDirection: 'row', alignItems: 'flex-start', paddingTop: 14, paddingBottom: 14}}>
+                            <Text style={this.styles.viewTitleSM}>Tracking {this.state.db.balanceInfo.addresses.length} accounts</Text>
+                        </View>
+                        <View style={{flex: 0.4, alignItems: 'flex-end', paddingTop: 15, paddingBottom: 14}}>
+                            <Text style={this.styles.viewTitleSM}>Edit Accounts</Text>
+                        </View>
+                        <View style={{flex: 0.05, alignItems: 'flex-end', paddingTop: 12, paddingBottom: 14}}>
+                            <Icon style={{fontSize: 20, color: '#4C7891', paddingTop: 4}} name="ios-arrow-forward"/>
+                        </View>
+                    </TouchableOpacity>
+                </View>
+                <View style={{width: '90%', height: 110, justifyContent: 'center'}} >
+                    <Text style={this.styles.attrTitle}>MARKET PRICES</Text>
+                    <View style={this.styles.card}>
+                        <View style={{flex: 0.45, flexDirection: 'column', paddingTop: 8, paddingBottom: 8}}>
+                            <Text style={this.styles.coinType}>{this.coinManager.getCoinName()}</Text>
+                            <Text style={this.styles.viewTitleSM}>{this.coinManager.getCoinTicker()}</Text>
+                        </View>
+                        <View style={ !this.state.loaded ? {flex: 0.45, alignItems: 'flex-end', paddingTop: 16} : { display : 'none' }}>
+                            <ActivityIndicator style={this.styles.viewTitleSpinner} size="small" color="#2196f3" />
+                        </View>
+                        <View style={ this.state.loaded ? {flex: 0.45, alignItems: 'flex-end', paddingTop: 9} : { display: 'none' }}>
+                            <Text style={this.styles.coinType}>${this.globals.roundTwoDecimals(this.state.currentPrice)}</Text>
+                            <Text style={{color: '#ffffff', fontWeight: 'bold', fontSize: 14, color:this.dailyChangeColor}}>{this.changeIcon}{this.state.dailyChange}%</Text>
+                        </View>
+                    </View>
+                </View>
+                <View style={{width: '90%', height: 80, justifyContent: 'center'}} >
+                    <View style={this.styles.pricing}>
+                        <View style={{flex: 0.45, alignItems: 'flex-end'}}>
+                            <Text style={this.styles.marketTitle}>MARKET CAP</Text>
+                            <Text style={this.styles.marketTitle}>24H VOLUME</Text>
+                            <Text style={this.styles.marketTitle}>CIRCULATING SUPPLY</Text>
+                        </View>
+                        <View style={ !this.state.loaded ? {flex: 0.45, alignItems: 'center', paddingTop: 14} : { display : 'none' }}>
+                            <ActivityIndicator style={this.styles.viewTitleSpinner} size="small" color="#2196f3" />
+                        </View>
+                        <View style={ this.state.loaded ? {flex: 0.45, alignItems: 'flex-start'} : { display: 'none' }}>
+                            <Text style={this.styles.marketData}>${Numbers.formatPriceWhole(this.state.marketCap)}</Text>
+                            <Text style={this.styles.marketData}>${Numbers.formatPriceWhole(this.state.dailyVolume)}</Text>
+                            <Text style={this.styles.marketData}>{Numbers.formatPriceWhole(this.state.circulatingSupply)} {this.coinManager.getCoinTicker()}</Text>
+                        </View>
+                    </View>
+                </View>
+                <View style={{width: '90%', height: 50, justifyContent: 'center'}} >
+                    <View style={this.styles.donateContainer}>
+                        <Text style={this.styles.donateTitle}>Donate to our {this.coinManager.getCoinName()} development</Text>
+                        <Text selectable={true} style={this.styles.donateAddress}>{this.coinManager.getCoinDonationAddress()}</Text>
+                    </View>
                 </View>
             </ScrollView>
-        );
+            );
+        }
     }
-}
-
-const styles = StyleSheet.create({
-    darkBackground: {
-        backgroundColor: '#486C96'
-    },
-    card: {
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 0
-    },
-    priceInfo: {
-        flex: 1,
-        flexDirection: 'row',
-        justifyContent: 'center',
-        marginTop: 16,
-    },
-    price: {
-        flex: .3,
-        alignItems: 'center'
-    },
-    currentPrice: {
-        flex: 0.8,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#ffffff20',
-        paddingTop: 10,
-        paddingBottom: 10,
-        marginTop: 12,
-        marginBottom: 12
-    },
-    flatWrapTop: {
-        backgroundColor: '#486C96',
-        justifyContent: 'center',
-        alignItems: 'center'
-    },
-    flatWrapBottom: {
-        backgroundColor: '#ffffff',
-        justifyContent: 'center',
-        alignItems: 'center'
-    },
-    error: {
-        marginTop: 28,
-        marginBottom: 28,
-        color: '#DC143C'
-    },
-    viewTitleSpinner: {
-        marginTop: 28,
-        marginBottom: 28
-    },
-    subTitle: {
-        color: '#ffffff',
-        fontWeight: 'bold',
-        marginTop: 10,
-        fontSize: 14
-    },
-    coinType: {
-        marginTop: 4,
-        color: '#fff',
-        fontSize: 18
-    },
-    viewTitleL: {
-        marginTop: 3,
-        marginBottom: 10,
-        fontSize: 18,
-        fontWeight: '200',
-        textAlign: 'left',
-        color: '#ffffff',
-    },
-    viewTitle: {
-        margin: 5,
-        fontSize: 18,
-        fontWeight: 'bold',
-        textAlign: 'left',
-        color: '#ffffff',
-    },
-    viewTitleSM: {
-        fontSize: 14,
-        textAlign: 'left',
-        color: '#ffffff',
-    },
-    donateContainer: {
-        flex: 1,
-        flexDirection: 'column',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginTop: 36,
-        backgroundColor: '#486C96'
-    },
-    donateTitle: {
-        margin: 5,
-        fontSize: 14,
-        fontWeight: 'bold',
-        textAlign: 'center',
-        color: '#ffffff',
-        marginBottom: 4
-    },
-    donateAddress: {
-        margin: 5,
-        fontSize: 14,
-        fontWeight: 'bold',
-        textAlign: 'center',
-        color: '#ffffff',
-        marginBottom: 8,
-    },
-    rightButton: {
-        marginRight: 16,
-        fontSize: 26,
-        color: '#555555',
-    },
-    symbol: {
-        marginTop: 30,
-        marginBottom: 10,
-        width: 60,
-        height: 60,
-        justifyContent: 'center',
-        alignItems: 'center',
-    }
-    /*<Text style={styles.viewTitleSM}>Total Balance: {Numbers.formatBalance(this.state.totalBalance, 'US')} {this.coinManager.getCoinTicker()}</Text>
-                            <Text style={styles.viewTitleSM}>${this.state.valueInDollars} USD</Text>*/
-});

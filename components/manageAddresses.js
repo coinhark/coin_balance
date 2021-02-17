@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { RefreshControl, Clipboard, Text, View, ScrollView, StyleSheet, Alert, AsyncStorage, ActivityIndicator, Keyboard } from 'react-native';
+import { RefreshControl, Clipboard, Text, View,  ScrollView, StyleSheet, Alert, AsyncStorage, ActivityIndicator, Keyboard } from 'react-native';
 import { FormLabel, FormInput, Button, Card } from 'react-native-elements'
 import GlobalConstants from '../globals';
 import CoinManager from '../coinmanager';
@@ -41,10 +41,12 @@ export default class ManageAddress extends Component {
     }
 
     static navigationOptions = ({ navigate, navigation }) => ({
-        title: GlobalConstants.getAppName(),
+        title: 'Manage Accounts',
         gesturesEnabled: false,
         headerLeft: <Icon name="home" style={styles.leftButton} onPress={() =>{ navigation.navigate('Home'); }} />,
-        headerRight: <Icon name="add" style={styles.rightButton} onPress={() =>{ navigation.navigate('AddAddress')}}/>
+        headerRight: <Icon name="add" style={styles.rightButton} onPress={() =>{ navigation.navigate('AddAddress')}}/>,
+        headerStyle: { backgroundColor: '#0C1C26' },
+        headerTitleStyle: { color: '#f7f7f7' }
     })
 
     initView = () => {
@@ -104,7 +106,7 @@ export default class ManageAddress extends Component {
     render() {
         const { navigate } = this.props.navigation;
         return (
-            <ScrollView horizontal={false}
+            <ScrollView style={styles.darkBackground} horizontal={false}
                         refreshControl={
                             <RefreshControl
                                 enabled={true}
@@ -112,21 +114,17 @@ export default class ManageAddress extends Component {
                                 onRefresh={() => this.initView()}
                             />
                         }>
-                <Card>
                     <View style={{
                         flex: 1,
                         flexDirection: 'row',
                         justifyContent: 'space-between',
+                        paddingTop: 10,
+                        paddingBottom: 10
                     }}>
-                    <View style={{ flex: 0.25, borderBottomColor: "#e1e8ee", borderBottomWidth: 1, marginLeft: 2 }} />
-                    <View style={{ flex: 0.50, borderBottomColor: "#e1e8ee", borderBottomWidth: 1 }} >
-                        <Text style={styles.cardTitle}>Addresses</Text>
-                    </View>
-                    <View style={{ flex: 0.25, borderBottomColor: "#e1e8ee", borderBottomWidth: 1, marginRight: 2 }} />
                     </View>
                     {renderIf(this.state.db.balanceInfo.addresses.length == 0, <View>
                         <Icon name="add-alert" style={styles.addressIcon} fadeDuration={100} />
-                        <Text style={styles.noAddress}>It looks like you don't have any addresses yet.</Text>
+                        <Text style={styles.noAddress}>It looks like you don't have any accounts yet.</Text>
                         <Text style={styles.noAddress}>You can add one below.</Text>
                     </View>)}
                     {
@@ -146,15 +144,15 @@ export default class ManageAddress extends Component {
                                 }
                             ]
                             return (
-                                    <View key={i} style={styles.address}>
+                                    <View key={i} style={styles.card}>
                                         <Swipeout
                                             autoClose={true}
-                                            backgroundColor={'#ffffff'}
+                                            backgroundColor={'#0F2B3A'}
                                             right={swipeoutBtns}
-                                            buttonWidth={72}
+                                            buttonWidth={80}
                                         >
-                                        <Text key={i + '-text'}numberOfLines={1} ellipsizeMode='tail' style={styles.addressName}>{w.name}</Text>
-                                            <Text style={styles.addressBalance}>{w.totalBalance}
+                                        <Text key={i + '-text'} numberOfLines={1} ellipsizeMode='tail' style={styles.addressName}>{w.name}</Text>
+                                            <Text style={styles.addressBalance}>{Numbers.formatLongBalance(w.totalBalance)}
                                                 <Text style={{fontWeight: '100'}}> {this.coinManager.getCoinTicker()}</Text>
                                             </Text>
                                             <Text style={styles.addressBalance}>${w.valueInDollars}
@@ -170,47 +168,65 @@ export default class ManageAddress extends Component {
                         containerViewStyle={styles.buttonStyle}
                         onPress={() => navigate('AddAddress', {ltcPrice: this.state.ltcPrice})}
                         raised
-                        backgroundColor={'#2196f3'}
-                        title='Add New Address'
+                        backgroundColor={'#0E82AB'}
+                        title='Add Account'
                     />
-                </Card>
             </ScrollView>
         );
     }
 }
 
 const styles = StyleSheet.create({
+    darkBackground: {
+        backgroundColor: '#0C212D'
+    },
     address: {
-        borderBottomColor: "#CCCCCC",
+        flex: 1,
         borderBottomWidth: 1,
-        marginLeft: 16,
-        marginRight: 16
+        borderBottomColor: '#4C7891',
+        borderTopWidth: 1,
+        borderTopColor: '#4C7891',
+        marginLeft: 14
+    },
+    card: {
+        backgroundColor: '#0F2B3A',
+        borderRadius:4,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
+        paddingLeft: 18,
+        marginLeft: 12,
+        marginRight: 12,
+        marginBottom: 6
     },
     cardTitle: {
-        color: "#43484d",
-        fontSize: 16.099999,
-        fontWeight: 'bold',
-        marginBottom: 15,
+        color: '#4C7891',
+        fontWeight: '700',
+        fontSize: 14,
+        marginTop: 15,
         textAlign: 'center'
     },
     addressName: {
         fontSize: 16,
         marginTop: 8,
         marginBottom: 1,
-        fontWeight: 'bold'
+        fontWeight: 'bold',
+        color: '#ffffff'
     },
     addressBalance: {
         fontSize: 13,
         fontWeight: '500',
         marginBottom: 1,
+        color: '#ffffff'
     },
     addressText: {
         fontSize: 12,
-        marginBottom: 8
+        marginBottom: 8,
+        color: '#ffffff'
     },
     addressIcon: {
         fontSize: 50,
-        color: '#2196f3',
+        color: '#f7f7f7',
         textAlign: 'center',
         marginBottom: 14,
         marginTop: 20
@@ -218,14 +234,15 @@ const styles = StyleSheet.create({
     noAddress: {
         fontSize: 12,
         textAlign: 'center',
-        alignItems: 'center'
+        alignItems: 'center',
+        color: '#f7f7f7'
     },
     buttonStyle: {
-        marginTop: 30,
+        marginTop: 20,
     },
     refreshButton: {
         fontSize: 24,
-        color: '#555555',
+        color: '#f7f7f7',
         textAlign: 'right',
     },
     spinner: {
@@ -234,11 +251,11 @@ const styles = StyleSheet.create({
     rightButton: {
         marginRight: 16,
         fontSize: 26,
-        color: '#555555',
+        color: '#4C7891',
     },
     leftButton: {
         marginLeft: 16,
         fontSize: 26,
-        color: '#555555',
+        color: '#4C7891',
     },
 });

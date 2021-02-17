@@ -6,9 +6,13 @@ class GlobalConstants {
 
     }
 
+    static roundTwoDecimals(number) {
+        return parseFloat(number).toFixed(2);
+    }
+
     // Edit this for cointype (Ex: ltc, btc, etc)
     static getAppCoin() {
-      return 'eth';
+      return 'eos';
     }
 
     static getAppName() {
@@ -21,6 +25,8 @@ class GlobalConstants {
           return "Ethereum Balance";
         case 'xlm':
           return "Stellar Balance";
+        case 'eos':
+          return "EOS Balance";
       }
     }
 }
